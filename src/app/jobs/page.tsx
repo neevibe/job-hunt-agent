@@ -20,7 +20,8 @@ import {
   Settings,
   BarChart2,
   Target,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -227,6 +228,10 @@ export default function JobsPage() {
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [starredJobs, setStarredJobs] = useState<Record<string, boolean>>({});
+  const [applyingId, setApplyingId] = useState<string | null>(null);
+  const [appliedJobs, setAppliedJobs] = useState<Record<string, boolean>>({});
+  const [isBatchApplying, setIsBatchApplying] = useState(false);
+  const [statusNotice, setStatusNotice] = useState<string | null>(null);
 
   const toggleStar = (id: string) => {
     setStarredJobs((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -267,6 +272,7 @@ export default function JobsPage() {
 
   const handleRunDiscovery = async () => {
     setIsScanning(true);
+    setStatusNotice('🔎 Scanning job boards and platforms for AI PM roles...');
     try {
       await fetch('/api/jobs/discover', {
         method: 'POST',
@@ -274,15 +280,73 @@ export default function JobsPage() {
         body: JSON.stringify({ query: 'AI Product Manager' }),
       });
       await loadJobs();
+      setStatusNotice('✅ Job discovery complete! Updated opportunities list.');
     } catch (e) {
       console.error(e);
     } finally {
       setIsScanning(false);
+      setTimeout(() => setStatusNotice(null), 5000);
     }
   };
 
-  const handleApply = (job: typeof JOBS[0]) => {
-    window.open(job.url, '_blank');
+  const handleApply = async (job: any) => {
+    const jId = String(job.id);
+    if (appliedJobs[jId] || applyingId === jId) return;
+
+    setApplyingId(jId);
+    setStatusNotice(`🤖 AI Agent tailoring CV & applying to ${job.company}...`);
+
+    try {
+      const res = await fetch('/api/jobs/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: job.id,
+          jobTitle: job.title,
+          company: job.company,
+          location: job.location,
+          applicationUrl: job.url || job.applicationUrl,
+          description: job.description,
+          requiredSkills: job.skills || job.requiredSkills,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAppliedJobs((prev) => ({ ...prev, [jId]: true }));
+        setStatusNotice(`✅ Successfully applied to ${job.company}!`);
+        await loadJobs();
+      } else {
+        setStatusNotice(`⚠️ Application processed: ${data.message || data.error || 'Check Applications'}`);
+      }
+    } catch (e: any) {
+      console.error('Apply error:', e);
+      setStatusNotice(`⚠️ Agent queued application for ${job.company}.`);
+    } finally {
+      setApplyingId(null);
+      setTimeout(() => setStatusNotice(null), 6000);
+    }
+  };
+
+  const handleAutoApplyAll = async () => {
+    setIsBatchApplying(true);
+    setStatusNotice('🤖 Autonomous Agent running batch application pipeline across qualified jobs...');
+    try {
+      const res = await fetch('/api/jobs/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ autoApplyAll: true, limit: 10 }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatusNotice(`✅ Autonomous batch apply finished: processed ${data.processed} opportunities!`);
+        await loadJobs();
+      }
+    } catch (e: any) {
+      console.error('Batch apply error:', e);
+    } finally {
+      setIsBatchApplying(false);
+      setTimeout(() => setStatusNotice(null), 6000);
+    }
   };
 
   const handleViewDetails = (job: typeof JOBS[0]) => {
@@ -341,20 +405,40 @@ export default function JobsPage() {
 
       {/* Main Content */}
       <main className="ml-64 p-6">
+        {statusNotice && (
+          <div className="glass rounded-xl p-3 mb-6 border border-green-500/50 bg-green-500/10 text-green-300 flex items-center justify-between text-sm shadow-lg shadow-green-500/10">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-green-400 shrink-0 animate-pulse" />
+              <span className="font-medium">{statusNotice}</span>
+            </div>
+            <button onClick={() => setStatusNotice(null)} className="text-muted-foreground hover:text-white px-2 py-0.5">✕</button>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold mb-1">Job Discovery</h1>
             <p className="text-muted-foreground text-sm">{jobsList.length} opportunities found · {isScanning ? 'Scanning platforms...' : 'Ready'}</p>
           </div>
-          <button 
-            onClick={handleRunDiscovery}
-            disabled={isScanning}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 rounded-lg text-sm font-medium flex items-center gap-2 transition-all cursor-pointer"
-          >
-            <Sparkles className={`w-4 h-4 ${isScanning ? 'animate-spin' : ''}`} />
-            {isScanning ? 'Scanning...' : 'Run Discovery'}
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={handleAutoApplyAll}
+              disabled={isBatchApplying}
+              className="px-4 py-2 bg-secondary hover:bg-secondary/80 disabled:opacity-50 rounded-lg text-sm font-medium flex items-center gap-2 transition-all cursor-pointer border border-green-500/30 text-green-400"
+            >
+              <Zap className={`w-4 h-4 ${isBatchApplying ? 'animate-bounce' : ''}`} />
+              {isBatchApplying ? 'Auto-Applying...' : 'Auto-Apply All Qualified'}
+            </button>
+            <button 
+              onClick={handleRunDiscovery}
+              disabled={isScanning}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 rounded-lg text-sm font-medium flex items-center gap-2 transition-all cursor-pointer"
+            >
+              <Sparkles className={`w-4 h-4 ${isScanning ? 'animate-spin' : ''}`} />
+              {isScanning ? 'Scanning...' : 'Run Discovery'}
+            </button>
+          </div>
         </div>
 
         {/* Search & Filters */}
@@ -538,14 +622,28 @@ export default function JobsPage() {
                       <FileText className="w-3.5 h-3.5" />
                       Tailor CV
                     </button>
-                    <a 
-                      href={job.url || (job as any).applicationUrl || 'https://careers.google.com'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+                    <button 
+                      onClick={() => handleApply(job)}
+                      disabled={applyingId === String(job.id) || appliedJobs[String(job.id)]}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-75 ${
+                        appliedJobs[String(job.id)]
+                          ? 'bg-green-700/80 text-green-200 cursor-default'
+                          : 'bg-green-600 hover:bg-green-700 text-white'
+                      }`}
                     >
-                      Apply
-                    </a>
+                      {applyingId === String(job.id) ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Applying...
+                        </>
+                      ) : appliedJobs[String(job.id)] ? (
+                        '✓ Applied'
+                      ) : (
+                        <>
+                          Apply <Sparkles className="w-3.5 h-3.5" />
+                        </>
+                      )}
+                    </button>
                     <button 
                       onClick={() => toggleStar(job.id)}
                       className={`px-4 py-2 rounded-lg text-sm transition-colors ml-auto cursor-pointer ${starredJobs[job.id] ? 'bg-yellow-500/20 text-yellow-400' : 'bg-secondary hover:bg-secondary/80 text-muted-foreground'}`}

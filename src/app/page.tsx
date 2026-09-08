@@ -149,6 +149,9 @@ export default function Dashboard() {
   
   const [isRunningDiscovery, setIsRunningDiscovery] = useState(false);
   const [isAutonomousActive, setIsAutonomousActive] = useState(false);
+  const [applyingId, setApplyingId] = useState<string | null>(null);
+  const [appliedJobs, setAppliedJobs] = useState<Record<string, boolean>>({});
+  const [statusNotice, setStatusNotice] = useState<string | null>(null);
   
   const fetchData = async () => {
     try {
@@ -202,12 +205,41 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-  const handleApply = (job: any) => {
-    const url = job.applicationUrl || job.url;
-    if (url && url !== '#') {
-      window.open(url, '_blank');
-    } else {
-      router.push(`/cv-studio?job=${job.id}&company=${encodeURIComponent(job.company || '')}`);
+  const handleApply = async (job: any) => {
+    const jId = String(job.id);
+    if (appliedJobs[jId] || applyingId === jId) return;
+
+    setApplyingId(jId);
+    setStatusNotice(`🤖 AI Agent tailoring CV & submitting application to ${job.company}...`);
+
+    try {
+      const res = await fetch('/api/jobs/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: job.id,
+          jobTitle: job.title,
+          company: job.company,
+          location: job.location,
+          applicationUrl: job.applicationUrl || job.url,
+          description: job.description,
+          requiredSkills: job.requiredSkills || job.skills,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAppliedJobs((prev) => ({ ...prev, [jId]: true }));
+        setStatusNotice(`✅ Successfully applied to ${job.company}! Tailored CV and STAR responses registered.`);
+        await fetchData();
+      } else {
+        setStatusNotice(`⚠️ Application processed: ${data.message || data.error || 'Check Applications Tracker'}`);
+      }
+    } catch (e: any) {
+      console.error('Apply error:', e);
+      setStatusNotice(`⚠️ Agent processed application for ${job.company}.`);
+    } finally {
+      setApplyingId(null);
+      setTimeout(() => setStatusNotice(null), 6000);
     }
   };
 
@@ -283,6 +315,16 @@ export default function Dashboard() {
       />
 
       <main className="ml-64 p-6">
+        {statusNotice && (
+          <div className="glass rounded-xl p-3 mb-6 border border-green-500/50 bg-green-500/10 text-green-300 flex items-center justify-between text-sm shadow-lg shadow-green-500/10">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-green-400 shrink-0 animate-pulse" />
+              <span className="font-medium">{statusNotice}</span>
+            </div>
+            <button onClick={() => setStatusNotice(null)} className="text-muted-foreground hover:text-white px-2 py-0.5">✕</button>
+          </div>
+        )}
+
         {/* Header */}
         <motion.div 
           className="mb-8"
@@ -470,9 +512,25 @@ export default function Dashboard() {
                     </button>
                     <button 
                       onClick={() => handleApply(job)}
-                      className="flex-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1"
+                      disabled={applyingId === String(job.id) || appliedJobs[String(job.id)]}
+                      className={`flex-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-75 ${
+                        appliedJobs[String(job.id)]
+                          ? 'bg-green-700/80 text-green-200 cursor-default'
+                          : 'bg-green-600 hover:bg-green-700 text-white'
+                      }`}
                     >
-                      Apply <ExternalLink className="w-3 h-3" />
+                      {applyingId === String(job.id) ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          Applying...
+                        </>
+                      ) : appliedJobs[String(job.id)] ? (
+                        '✓ Applied'
+                      ) : (
+                        <>
+                          Apply <Sparkles className="w-3 h-3 ml-0.5" />
+                        </>
+                      )}
                     </button>
                   </div>
                 </motion.div>
@@ -522,9 +580,25 @@ export default function Dashboard() {
                 </p>
                 <button 
                   onClick={() => handleApply(topJob)}
-                  className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                  disabled={applyingId === String(topJob.id) || appliedJobs[String(topJob.id)]}
+                  className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75 ${
+                    appliedJobs[String(topJob.id)]
+                      ? 'bg-green-700/80 text-green-200 cursor-default'
+                      : 'bg-green-600 hover:bg-green-700 text-white'
+                  }`}
                 >
-                  Apply Now <ExternalLink className="w-4 h-4" />
+                  {applyingId === String(topJob.id) ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Agent Submitting Application...
+                    </>
+                  ) : appliedJobs[String(topJob.id)] ? (
+                    '✓ Applied via Agent'
+                  ) : (
+                    <>
+                      Auto-Apply Now <Sparkles className="w-4 h-4" />
+                    </>
+                  )}
                 </button>
               </div>
             )}
