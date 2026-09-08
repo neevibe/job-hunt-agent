@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import { 
   Briefcase, 
@@ -163,9 +164,18 @@ const APPLICATIONS = [
 type StatusFilter = 'all' | 'applied' | 'in_review' | 'interview' | 'rejected';
 
 export default function ApplicationsPage() {
+  const router = useRouter();
   const [appsList, setAppsList] = useState(APPLICATIONS);
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [selectedApp, setSelectedApp] = useState<string | null>(null);
+  const [followUpCopied, setFollowUpCopied] = useState<string | null>(null);
+
+  const handleFollowUp = (app: any) => {
+    const draft = `Hi Team,\n\nI hope this message finds you well. I recently applied for the ${app.role} position at ${app.company} and wanted to reiterate my strong interest in the role.\n\nWith 10+ years of product leadership building enterprise AI platforms (e.g. EKO at BIAL, ₹500Cr+ decisions), I look forward to the opportunity to contribute to ${app.company}'s product vision.\n\nBest regards,\nNeeraj Prakash\nneevibe27@gmail.com`;
+    navigator.clipboard.writeText(draft);
+    setFollowUpCopied(app.id);
+    setTimeout(() => setFollowUpCopied(null), 3000);
+  };
 
   useEffect(() => {
     fetch('/api/queue')
@@ -324,10 +334,18 @@ export default function ApplicationsPage() {
                     <p className="text-sm text-muted-foreground">{app.nextStep}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button className="p-2 bg-secondary hover:bg-secondary/80 rounded-lg" title="Join Call">
+                    <button 
+                      onClick={() => window.open('https://meet.google.com', '_blank')}
+                      className="p-2 bg-secondary hover:bg-secondary/80 rounded-lg cursor-pointer" 
+                      title="Join Call"
+                    >
                       <Video className="w-4 h-4" />
                     </button>
-                    <button className="p-2 bg-secondary hover:bg-secondary/80 rounded-lg" title="Prep Notes">
+                    <button 
+                      onClick={() => router.push('/interview')}
+                      className="p-2 bg-secondary hover:bg-secondary/80 rounded-lg cursor-pointer" 
+                      title="Prep Notes"
+                    >
                       <FileText className="w-4 h-4" />
                     </button>
                   </div>
@@ -427,25 +445,34 @@ export default function ApplicationsPage() {
 
               {/* Actions */}
               <div className="flex gap-2 mt-4 pt-4 border-t border-border">
-                <button className="px-3 py-1.5 bg-secondary hover:bg-secondary/80 rounded-lg text-sm flex items-center gap-1.5">
+                <button 
+                  onClick={() => router.push('/cv-studio')}
+                  className="px-3 py-1.5 bg-secondary hover:bg-secondary/80 rounded-lg text-sm flex items-center gap-1.5 cursor-pointer"
+                >
                   <FileText className="w-3.5 h-3.5" />
                   View CV
                 </button>
-                <button className="px-3 py-1.5 bg-secondary hover:bg-secondary/80 rounded-lg text-sm flex items-center gap-1.5">
+                <button 
+                  onClick={() => handleFollowUp(app)}
+                  className="px-3 py-1.5 bg-secondary hover:bg-secondary/80 rounded-lg text-sm flex items-center gap-1.5 cursor-pointer transition-all"
+                >
                   <Mail className="w-3.5 h-3.5" />
-                  Follow Up
+                  {followUpCopied === app.id ? 'Copied Draft!' : 'Follow Up'}
                 </button>
                 <a 
-                  href={app.url}
+                  href={app.url || 'https://careers.google.com'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 bg-secondary hover:bg-secondary/80 rounded-lg text-sm flex items-center gap-1.5"
+                  className="px-3 py-1.5 bg-secondary hover:bg-secondary/80 rounded-lg text-sm flex items-center gap-1.5 cursor-pointer"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   Job Page
                 </a>
                 {app.status === 'interview' && (
-                  <button className="px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium flex items-center gap-1.5 ml-auto">
+                  <button 
+                    onClick={() => router.push('/interview')}
+                    className="px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium flex items-center gap-1.5 ml-auto cursor-pointer"
+                  >
                     <FileText className="w-3.5 h-3.5" />
                     Interview Prep
                   </button>

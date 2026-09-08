@@ -22,7 +22,7 @@ import {
   Trash2,
   Plus
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // Mock CV data
 const CVS = [
@@ -152,16 +152,45 @@ export default function CVStudioPage() {
   
   const selectedCVData = cvList.find(cv => cv.id === selectedCV) || cvList[0];
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const companyParam = params.get('company');
+      if (companyParam) {
+        const found = cvList.find(c => c.company.toLowerCase().includes(companyParam.toLowerCase()));
+        if (found) {
+          setSelectedCV(found.id);
+        } else {
+          const customItem = {
+            id: 'tailored-' + Date.now(),
+            name: `${companyParam} AI PM Tailored`,
+            targetJob: 'Senior AI Product Manager',
+            company: companyParam,
+            createdAt: 'Just now',
+            atsScore: 92,
+            status: 'ready',
+            highlights: ['EKO Platform', 'LLM Agent Systems', 'Product Strategy', 'Cross-functional Leadership'],
+            sections: ['Summary', 'Experience', 'Projects', 'Skills', 'Education']
+          };
+          setCvList(prev => [customItem, ...prev]);
+          setSelectedCV(customItem.id);
+        }
+      }
+    }
+  }, []);
+
   const handleGenerateCV = async () => {
     setIsGenerating(true);
     try {
+      const targetCompany = selectedCVData?.company || 'Target Company';
+      const targetJob = selectedCVData?.targetJob || 'Senior AI Product Manager';
       const res = await fetch('/api/cv/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           job: {
-            title: 'Senior AI Product Manager',
-            company: 'Anthropic',
+            title: targetJob,
+            company: targetCompany,
             skills: ['LLM', 'GenAI', 'Product Strategy', 'Agent Systems'],
           }
         })
@@ -170,9 +199,9 @@ export default function CVStudioPage() {
       if (data.success && data.cv) {
         const newCvItem = {
           id: String(Date.now()),
-          name: `Tailored - ${data.cv.targetCompany}`,
-          targetJob: data.cv.targetJob,
-          company: data.cv.targetCompany,
+          name: `Tailored - ${data.cv.targetCompany || targetCompany}`,
+          targetJob: data.cv.targetJob || targetJob,
+          company: data.cv.targetCompany || targetCompany,
           createdAt: 'Just now',
           atsScore: data.cv.atsScore || 94,
           status: 'ready',

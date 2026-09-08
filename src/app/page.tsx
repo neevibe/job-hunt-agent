@@ -150,68 +150,92 @@ export default function Dashboard() {
   const [isRunningDiscovery, setIsRunningDiscovery] = useState(false);
   const [isAutonomousActive, setIsAutonomousActive] = useState(false);
   
+  const fetchData = async () => {
+    try {
+      const [autoRes, queueRes, actRes, jobsRes] = await Promise.allSettled([
+        fetch('/api/autonomous'),
+        fetch('/api/queue'),
+        fetch('/api/activity'),
+        fetch('/api/jobs/discover')
+      ]);
+      
+      if (autoRes.status === 'fulfilled' && autoRes.value.ok) {
+         const autoData = await autoRes.value.json();
+         setAutonomous(autoData);
+         setIsAutonomousActive(autoData.isRunning || false);
+      }
+      
+      if (queueRes.status === 'fulfilled' && queueRes.value.ok) {
+         const qData = await queueRes.value.json();
+         setQueueStats(qData);
+      }
+      
+      if (actRes.status === 'fulfilled' && actRes.value.ok) {
+         const actData = await actRes.value.json();
+         const items = actData.success && Array.isArray(actData.activities) ? actData.activities : (Array.isArray(actData) ? actData : []);
+         setActivities(items.slice(0, 10));
+      }
+      
+      if (jobsRes.status === 'fulfilled' && jobsRes.value.ok) {
+         const jobsData = await jobsRes.value.json();
+         if (jobsData.jobs && jobsData.jobs.length > 0) {
+           setJobs(jobsData.jobs);
+         } else if (Array.isArray(jobsData) && jobsData.length > 0) {
+           setJobs(jobsData);
+         } else {
+           setJobs(mockJobs);
+         }
+      } else {
+         setJobs(mockJobs);
+      }
+      
+    } catch (e) {
+      console.error('Error fetching data:', e);
+      setJobs(mockJobs);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
-    
-    async function fetchData() {
-      try {
-        const [autoRes, queueRes, actRes, jobsRes] = await Promise.allSettled([
-          fetch('/api/autonomous'),
-          fetch('/api/queue'),
-          fetch('/api/activity'),
-          fetch('/api/jobs/discover')
-        ]);
-        
-        if (autoRes.status === 'fulfilled' && autoRes.value.ok) {
-           const autoData = await autoRes.value.json();
-           setAutonomous(autoData);
-           setIsAutonomousActive(autoData.isActive || false);
-        }
-        
-        if (queueRes.status === 'fulfilled' && queueRes.value.ok) {
-           const qData = await queueRes.value.json();
-           setQueueStats(qData);
-        }
-        
-        if (actRes.status === 'fulfilled' && actRes.value.ok) {
-           const actData = await actRes.value.json();
-           setActivities(Array.isArray(actData) ? actData.slice(0, 10) : []);
-        }
-        
-        if (jobsRes.status === 'fulfilled' && jobsRes.value.ok) {
-           const jobsData = await jobsRes.value.json();
-           if (jobsData.jobs && jobsData.jobs.length > 0) {
-             setJobs(jobsData.jobs);
-           } else if (Array.isArray(jobsData) && jobsData.length > 0) {
-             setJobs(jobsData);
-           } else {
-             setJobs(mockJobs);
-           }
-        } else {
-           setJobs(mockJobs);
-        }
-        
-      } catch (e) {
-        console.error('Error fetching data:', e);
-        setJobs(mockJobs);
-      } finally {
-        setLoading(false);
-      }
-    }
-    
     fetchData();
   }, []);
 
-  const handleApply = (job: typeof mockJobs[0]) => {
-    window.open(job.url, '_blank');
+  const handleApply = (job: any) => {
+    const url = job.applicationUrl || job.url;
+    if (url && url !== '#') {
+      window.open(url, '_blank');
+    } else {
+      router.push(`/cv-studio?job=${job.id}&company=${encodeURIComponent(job.company || '')}`);
+    }
   };
 
-  const handleViewJD = (job: typeof mockJobs[0]) => {
-    window.open(job.url, '_blank');
+  const handleViewJD = (job: any) => {
+    const url = job.applicationUrl || job.url;
+    if (url && url !== '#') {
+      window.open(url, '_blank');
+    } else {
+      router.push(`/jobs`);
+    }
   };
 
-  const handleTailorCV = (job: typeof mockJobs[0]) => {
-    router.push(`/cv-studio?job=${job.id}&company=${encodeURIComponent(job.company)}`);
+  const handleTailorCV = (job: any) => {
+    router.push(`/cv-studio?job=${job.id}&company=${encodeURIComponent(job.company || '')}`);
+  };
+
+  const toggleAutonomous = async (nextState: boolean) => {
+    setIsAutonomousActive(nextState);
+    try {
+      await fetch('/api/autonomous', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: nextState })
+      });
+      await fetchData();
+    } catch (e) {
+      console.error('Failed to toggle autonomous mode:', e);
+    }
   };
 
   const runDiscovery = async () => {
@@ -222,9 +246,9 @@ export default function Dashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'run_discovery' }) 
       });
-      // Optionally refresh data here
+      await fetchData();
     } catch (e) {
-      console.error(e);
+      console.error('Discovery error:', e);
     } finally {
       setIsRunningDiscovery(false);
     }
@@ -251,7 +275,12 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar activePath="/" counts={{ jobs: jobsDiscoveredCount, applications: appsCount }} />
+      <Sidebar 
+        activePath="/" 
+        counts={{ jobs: jobsDiscoveredCount, applications: appsCount }} 
+        initialAutonomous={isAutonomousActive}
+        onAutonomousChange={toggleAutonomous}
+      />
 
       <main className="ml-64 p-6">
         {/* Header */}
@@ -292,7 +321,7 @@ export default function Dashboard() {
                   type="checkbox" 
                   className="sr-only peer" 
                   checked={isAutonomousActive}
-                  onChange={() => setIsAutonomousActive(!isAutonomousActive)}
+                  onChange={() => toggleAutonomous(!isAutonomousActive)}
                 />
                 <div className="w-11 h-6 bg-secondary peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
               </label>

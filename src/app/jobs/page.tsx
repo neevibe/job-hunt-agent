@@ -226,6 +226,11 @@ export default function JobsPage() {
   const [sortBy, setSortBy] = useState<SortKey>('score');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [starredJobs, setStarredJobs] = useState<Record<string, boolean>>({});
+
+  const toggleStar = (id: string) => {
+    setStarredJobs((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const loadJobs = async () => {
     try {
@@ -519,30 +524,34 @@ export default function JobsPage() {
                   {/* Actions */}
                   <div className="flex gap-2">
                     <a 
-                      href={job.url}
+                      href={job.url || (job as any).applicationUrl || 'https://careers.google.com'}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors"
+                      className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors cursor-pointer"
                     >
                       View Details
                     </a>
                     <button 
                       onClick={() => handleTailorCV(job)}
-                      className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors flex items-center gap-1.5"
+                      className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors flex items-center gap-1.5 cursor-pointer"
                     >
                       <FileText className="w-3.5 h-3.5" />
                       Tailor CV
                     </button>
                     <a 
-                      href={job.url}
+                      href={job.url || (job as any).applicationUrl || 'https://careers.google.com'}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition-colors"
+                      className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition-colors cursor-pointer"
                     >
                       Apply
                     </a>
-                    <button className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors ml-auto">
-                      <Star className="w-4 h-4" />
+                    <button 
+                      onClick={() => toggleStar(job.id)}
+                      className={`px-4 py-2 rounded-lg text-sm transition-colors ml-auto cursor-pointer ${starredJobs[job.id] ? 'bg-yellow-500/20 text-yellow-400' : 'bg-secondary hover:bg-secondary/80 text-muted-foreground'}`}
+                      title={starredJobs[job.id] ? 'Unstar' : 'Star job'}
+                    >
+                      <Star className={`w-4 h-4 ${starredJobs[job.id] ? 'fill-yellow-400' : ''}`} />
                     </button>
                   </div>
                 </div>

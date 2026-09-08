@@ -130,6 +130,10 @@ export function Sidebar({
   );
 
   useEffect(() => {
+    setIsAutonomous(initialAutonomous);
+  }, [initialAutonomous]);
+
+  useEffect(() => {
     if (lastScanTime) {
       setFormattedScanTime(lastScanTime);
     } else {
@@ -140,12 +144,25 @@ export function Sidebar({
   }, [lastScanTime]);
 
   /**
-   * Handles toggling autonomous mode and notifies parent if listener provided.
+   * Handles toggling autonomous mode and notifies parent if listener provided,
+   * or triggers the autonomous API directly.
    */
-  const handleToggleAutonomous = () => {
+  const handleToggleAutonomous = async () => {
     const nextState = !isAutonomous;
     setIsAutonomous(nextState);
-    onAutonomousChange?.(nextState);
+    if (onAutonomousChange) {
+      onAutonomousChange(nextState);
+    } else {
+      try {
+        await fetch('/api/autonomous', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: nextState })
+        });
+      } catch (e) {
+        console.error('Sidebar toggle failed:', e);
+      }
+    }
   };
 
   return (

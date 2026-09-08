@@ -8,6 +8,7 @@ export default function SettingsPage() {
   const [config, setConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     fetch('/api/settings')
@@ -16,20 +17,20 @@ export default function SettingsPage() {
         if (data.success && data.config) {
           setConfig(data.config);
         } else {
-          // Default state if not found
+          // Default state for Neeraj Prakash (AI PM)
           setConfig({
             enabled: false,
-            dailyLimit: 50,
-            minMatchScore: 80,
-            autoApplyThreshold: 90,
-            humanReviewThreshold: 75,
+            dailyLimit: 100,
+            minMatchScore: 75,
+            autoApplyThreshold: 85,
+            humanReviewThreshold: 65,
             autoSubmit: false,
-            targetRoles: ['Frontend Developer', 'React Developer'],
-            targetLocations: ['Remote'],
-            platforms: { linkedin: true, wellfound: true },
-            companies: { preferred: [], blacklisted: [] },
-            remotePreference: 'Remote',
-            compensation: { min: 100000, max: 150000, currency: 'USD' }
+            targetRoles: ['AI Product Manager', 'GenAI Product Manager', 'Product Manager AI', 'AI Product Lead', 'Technical PM AI'],
+            targetLocations: ['Bengaluru', 'Mumbai', 'Hyderabad', 'Remote'],
+            platforms: { linkedin: true, naukri: true, wellfound: true, instahyre: true, greenhouse: true, lever: true },
+            companies: { preferred: ['Google', 'Razorpay', 'PhonePe', 'Databricks', 'OpenAI'], blacklisted: [] },
+            remotePreference: 'Any',
+            compensation: { min: 5000000, max: 8000000, currency: 'INR' }
           });
         }
         setLoading(false);
@@ -38,12 +39,15 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     setSaving(true);
+    setSaved(false);
     try {
       await fetch('/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config),
       });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
     } catch (error) {
       console.error('Failed to save settings', error);
     } finally {
@@ -73,10 +77,12 @@ export default function SettingsPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="bg-green-600 hover:bg-green-700 rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
+              className={`rounded-lg px-4 py-2 text-sm font-medium flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50 ${
+                saved ? 'bg-green-700 text-white shadow-lg shadow-green-500/20' : 'bg-green-600 hover:bg-green-700 text-white'
+              }`}
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-              Save Changes
+              {saved ? 'Saved! ✓' : 'Save Changes'}
             </button>
           </div>
 
