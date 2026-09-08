@@ -3,7 +3,7 @@ import { generateObject } from 'ai';
 import { z } from 'zod';
 import { db } from '@/db';
 import { job, jobScore, jobIntelligence } from '@/db/schema';
-import { getCandidateDNA } from './candidate-dna';
+import { getCandidateDNA } from '@/lib/candidate-dna';
 
 /**
  * JOB SCORING AGENT
