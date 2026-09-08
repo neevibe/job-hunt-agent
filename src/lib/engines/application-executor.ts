@@ -26,6 +26,8 @@ import { BrowserAutomation } from '@/lib/browser/automation';
 import { ensureCandidateInDB } from '@/lib/engines/candidate-sync';
 import { checkApplicationIdempotency } from '@/lib/engines/idempotency';
 import { transitionStatus } from '@/lib/engines/application-queue';
+import { platformRegistry } from '@/lib/platforms/registry';
+import { getCandidateDNA } from '@/lib/candidate-dna';
 
 export interface ApplyJobInput {
   jobId?: number | string;
@@ -162,14 +164,104 @@ export async function executeApplicationForJob(input: ApplyJobInput): Promise<Ap
     };
   }
 
-  // 4. Run Browser / Form Automation
-  const automationResult = await BrowserAutomation.runApplication({
-    applicationUrl,
-    jobTitle,
-    companyName,
-    customAnswers: generatedAnswers,
-    autoSubmit: input.autoSubmit ?? true,
-  });
+  // 4. Try Direct ATS API Submission (Greenhouse / Lever) if matching URL or platform
+  let automationResult: any = null;
+  const candidateDNA = getCandidateDNA();
+  const lowerUrl = applicationUrl.toLowerCase();
+
+  const isGreenhouse = lowerUrl.includes('greenhouse.io') || jobRecord?.source === 'greenhouse';
+  const isLever = lowerUrl.includes('lever.co') || jobRecord?.source === 'lever';
+
+  if (isGreenhouse) {
+    try {
+      const ghAdapter = platformRegistry.getAdapter('greenhouse');
+      if (ghAdapter) {
+        const discoveredPayload = {
+          externalId: String(targetJobId),
+          title: jobTitle,
+          company: companyName,
+          location: input.location || 'Remote',
+          isRemote: true,
+          description,
+          requiredSkills,
+          preferredSkills: [],
+          applicationUrl,
+          source: 'greenhouse' as const,
+        };
+        await ghAdapter.startApplication(discoveredPayload);
+        await ghAdapter.fillApplication(discoveredPayload, {
+          candidateName: candidateDNA.name,
+          email: candidateDNA.email,
+          phone: candidateDNA.phone,
+          linkedinUrl: candidateDNA.linkedinUrl,
+          portfolioUrl: candidateDNA.portfolioUrl,
+          resumePath: '',
+          resumeContent: `Candidate: ${candidateDNA.name} (${candidateDNA.email})\nTarget: ${jobTitle} at ${companyName}\nLinkedIn: ${candidateDNA.linkedinUrl}\nPortfolio: ${candidateDNA.portfolioUrl}`,
+          answers: generatedAnswers,
+        });
+        const ghResult = await ghAdapter.submitApplication();
+        if (ghResult.success) {
+          automationResult = ghResult;
+        }
+      }
+    } catch (err: any) {
+      console.warn('Greenhouse ATS API submission fallback:', err.message);
+    }
+  } else if (isLever) {
+    try {
+      const leverAdapter = platformRegistry.getAdapter('lever');
+      if (leverAdapter) {
+        const discoveredPayload = {
+          externalId: String(targetJobId),
+          title: jobTitle,
+          company: companyName,
+          location: input.location || 'Remote',
+          isRemote: true,
+          description,
+          requiredSkills,
+          preferredSkills: [],
+          applicationUrl,
+          source: 'lever' as const,
+        };
+        await leverAdapter.startApplication(discoveredPayload);
+        await leverAdapter.fillApplication(discoveredPayload, {
+          candidateName: candidateDNA.name,
+          email: candidateDNA.email,
+          phone: candidateDNA.phone,
+          linkedinUrl: candidateDNA.linkedinUrl,
+          portfolioUrl: candidateDNA.portfolioUrl,
+          resumePath: '',
+          resumeContent: `Candidate: ${candidateDNA.name} (${candidateDNA.email})\nTarget: ${jobTitle} at ${companyName}\nLinkedIn: ${candidateDNA.linkedinUrl}\nPortfolio: ${candidateDNA.portfolioUrl}`,
+          answers: generatedAnswers,
+        });
+        const leverResult = await leverAdapter.submitApplication();
+        if (leverResult.success) {
+          automationResult = leverResult;
+        }
+      }
+    } catch (err: any) {
+      console.warn('Lever ATS API submission fallback:', err.message);
+    }
+  }
+
+  // Fallback to BrowserAutomation / Assisted Mode if not an API platform or if API couldn't complete
+  if (!automationResult) {
+    automationResult = await BrowserAutomation.runApplication({
+      applicationUrl,
+      jobTitle,
+      companyName,
+      customAnswers: generatedAnswers,
+      autoSubmit: input.autoSubmit ?? true,
+    });
+  }
+
+  // Determine actual status
+  const isDirectlySubmitted = automationResult.success && !automationResult.requiresHumanReview;
+  const appStatus = isDirectlySubmitted ? 'applied' : 'in_review';
+  const confirmationMessage = automationResult.confirmationMessage || 
+    (automationResult.requiresHumanReview 
+      ? `Assisted Mode: Application package generated (Tailored CV + STAR Answers). Ready for 1-click submission.`
+      : `Application submitted via Agent`);
 
   // 5. Persist Application Record in Database
   let appId: number | undefined;
@@ -178,9 +270,9 @@ export async function executeApplicationForJob(input: ApplyJobInput): Promise<Ap
       candidateId,
       jobId: targetJobId,
       cvId,
-      status: 'applied',
+      status: appStatus,
       appliedAt: new Date(),
-      notes: automationResult.confirmationMessage || `Applied via Autonomous Agent`,
+      notes: confirmationMessage,
     }).returning();
 
     appId = appRecord.id;

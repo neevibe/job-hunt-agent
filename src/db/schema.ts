@@ -530,6 +530,20 @@ export const autonomousConfigRelations = relations(autonomousConfig, ({ one }) =
   }),
 }));
 
+export const applicationAnswerRelations = relations(applicationAnswer, ({ one }) => ({
+  application: one(application, {
+    fields: [applicationAnswer.applicationId],
+    references: [application.id],
+  }),
+}));
+
+export const applicationEventRelations = relations(applicationEvent, ({ one }) => ({
+  application: one(application, {
+    fields: [applicationEvent.applicationId],
+    references: [application.id],
+  }),
+}));
+
 export const evidenceBankRelations = relations(evidenceBank, ({ one }) => ({
   candidate: one(candidate, {
     fields: [evidenceBank.candidateId],
@@ -540,3 +554,4 @@ export const evidenceBankRelations = relations(evidenceBank, ({ one }) => ({
     references: [experience.id],
   }),
 }));
+
