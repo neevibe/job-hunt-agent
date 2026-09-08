@@ -1,5 +1,5 @@
 import { db } from '@/db';
-import { job, company, agentActivity } from '@/db/schema';
+import { job, company, agentActivity, jobScore } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import {
   type DiscoveredJob,
@@ -10,6 +10,7 @@ import {
 import { platformRegistry } from '@/lib/platforms/registry';
 import { generateDeduplicationHash } from '@/lib/utils';
 import { enqueue } from '@/lib/engines/application-queue';
+import { scoreJob } from '@/lib/agents/job-scoring-agent';
 
 export interface DiscoveryResult {
   discovered: number;
@@ -143,9 +144,47 @@ export async function runDiscovery(query?: Partial<SearchQuery>): Promise<Discov
         })
         .returning();
 
-      // Enqueue to application queue
+      // Score newly discovered job against candidate profile
+      const scored = scoreJob({
+        id: insertedJob.id,
+        company: j.company,
+        title: j.title,
+        location: j.location,
+        isRemote: j.isRemote,
+        salaryMin: j.salaryMin,
+        salaryMax: j.salaryMax,
+        experienceMin: j.experienceMin,
+        experienceMax: j.experienceMax,
+        description: j.description,
+        requiredSkills: j.requiredSkills,
+        preferredSkills: j.preferredSkills,
+      });
+
+      try {
+        await db.insert(jobScore).values({
+          jobId: insertedJob.id,
+          candidateId: 1,
+          overallScore: scored.overallScore,
+          aiRelevanceScore: scored.aiRelevanceScore,
+          productOwnershipScore: scored.productOwnershipScore,
+          pmExperienceScore: scored.pmExperienceScore,
+          domainScore: scored.domainScore,
+          leadershipScore: scored.leadershipScore,
+          analyticsScore: scored.analyticsScore,
+          seniorityScore: scored.seniorityScore,
+          locationScore: scored.locationScore,
+          explanation: scored.explanation,
+          recommendation: scored.recommendation,
+          strengths: scored.strengths,
+          gaps: scored.gaps,
+        });
+      } catch (scoreErr) {
+        console.warn(`Could not save initial score for job ${insertedJob.id}:`, scoreErr);
+      }
+
+      // Enqueue to application queue with match score
       const hash = generateDeduplicationHash(j.company, j.title, j.location, j.description);
-      await enqueue(insertedJob.id, 1, j.source, undefined, hash);
+      await enqueue(insertedJob.id, 1, j.source, scored.overallScore, hash);
     } catch (err) {
       console.error(`❌ 🔎 [DiscoveryEngine] Error inserting job ${j.title}:`, err);
     }

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || 'all';
 
     // Query jobs from database with scores
-    const jobs = await db.query.job.findMany({
+    let jobs = await db.query.job.findMany({
       with: {
         company: true,
         scores: true,
@@ -41,6 +41,24 @@ export async function GET(request: NextRequest) {
       orderBy: (j, { desc: d }) => [d(j.dateDiscovered)],
       limit,
     });
+
+    // Auto-discover live jobs on first load if DB is empty
+    if (jobs.length === 0) {
+      try {
+        const { runDiscovery } = await import('@/lib/engines/discovery');
+        await runDiscovery();
+        jobs = await db.query.job.findMany({
+          with: {
+            company: true,
+            scores: true,
+          },
+          orderBy: (j, { desc: d }) => [d(j.dateDiscovered)],
+          limit,
+        });
+      } catch (discoveryErr) {
+        console.warn('[Auto-Discovery] Initial scan notice:', discoveryErr);
+      }
+    }
 
     // Format for frontend
     const formattedJobs = jobs.map((j) => {

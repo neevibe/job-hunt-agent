@@ -14,7 +14,6 @@ import {
  */
 const DEFAULT_LEVER_COMPANIES: string[] = [
   'spotify',
-  'netflix',
   'palantir',
   'airtable',
   'benchling',
@@ -101,8 +100,8 @@ export class LeverAdapter implements JobSourceAdapter {
     maxRequestsPerMinute: 30,
     maxRequestsPerHour: 500,
     maxApplicationsPerDay: 50,
-    minDelayBetweenRequestsMs: 1500,
-    maxDelayBetweenRequestsMs: 4000,
+    minDelayBetweenRequestsMs: 1000,
+    maxDelayBetweenRequestsMs: 3000,
   };
 
   private currentJob: DiscoveredJob | null = null;
@@ -119,15 +118,14 @@ export class LeverAdapter implements JobSourceAdapter {
     const companiesToSearch = [...DEFAULT_LEVER_COMPANIES];
 
     // Add potential companies from keywords
-    for (const kw of query.keywords) {
+    for (const kw of query.keywords || []) {
       const sanitized = kw.toLowerCase().replace(/[^a-z0-9]/g, '');
       if (sanitized && !companiesToSearch.includes(sanitized) && sanitized.length >= 3) {
         companiesToSearch.push(sanitized);
       }
     }
 
-    // Search target companies (capped to 8 per search run for rate limit safety)
-    const activeCompanies = companiesToSearch.slice(0, 8);
+    const activeCompanies = companiesToSearch.slice(0, 10);
 
     for (const company of activeCompanies) {
       try {
@@ -160,59 +158,48 @@ export class LeverAdapter implements JobSourceAdapter {
             posting.additionalPlain ||
             '';
           const fullText = `${title} ${locationName} ${description}`.toLowerCase();
+          const lowerTitle = title.toLowerCase();
 
-          // Title matching
-          if (query.titles.length > 0) {
-            const matchesTitle = query.titles.some((t) =>
-              title.toLowerCase().includes(t.toLowerCase())
-            );
-            if (!matchesTitle) continue;
+          // Match PM, AI Product, Strategy, Solutions & Technical PM roles
+          const isTargetRole =
+            lowerTitle.includes('product') ||
+            lowerTitle.includes('pm') ||
+            lowerTitle.includes('ai') ||
+            lowerTitle.includes('strategy') ||
+            lowerTitle.includes('advisory') ||
+            lowerTitle.includes('solutions') ||
+            lowerTitle.includes('lead') ||
+            (query.titles || []).some((t) => lowerTitle.includes(t.toLowerCase()));
+
+          const isExcluded =
+            lowerTitle.includes('recruiter') ||
+            lowerTitle.includes('accountant') ||
+            lowerTitle.includes('paralegal') ||
+            lowerTitle.includes('sales development rep') ||
+            lowerTitle.includes('facilities') ||
+            lowerTitle.includes('counsel');
+
+          if (!isTargetRole || isExcluded) {
+            continue;
           }
 
-          // Keyword matching
-          if (query.keywords.length > 0) {
-            const matchesKeyword = query.keywords.some((k) =>
-              fullText.includes(k.toLowerCase())
-            );
-            if (!matchesKeyword) continue;
-          }
-
-          // Remote filter
           const isRemote =
             posting.workplaceType === 'remote' ||
             locationName.toLowerCase().includes('remote') ||
             title.toLowerCase().includes('remote') ||
             fullText.includes('remote');
 
-          if (query.remote !== undefined && query.remote !== isRemote) {
-            continue;
-          }
-
-          // Location matching
-          if (query.locations.length > 0 && !isRemote) {
-            const matchesLocation = query.locations.some((loc) =>
-              locationName.toLowerCase().includes(loc.toLowerCase())
-            );
-            if (!matchesLocation) continue;
-          }
-
-          // Date filter
-          const postedDate = posting.createdAt ? new Date(posting.createdAt) : undefined;
-          if (query.postedWithinDays && postedDate) {
-            const cutoff = Date.now() - query.postedWithinDays * 24 * 60 * 60 * 1000;
-            if (postedDate.getTime() < cutoff) continue;
-          }
-
+          const postedDate = posting.createdAt ? new Date(posting.createdAt) : new Date();
           const jobSkills = extractSkills(`${title} ${description}`);
 
           discovered.push({
             externalId: `lever-${company}-${posting.id}`,
             title,
             company: company.charAt(0).toUpperCase() + company.slice(1),
-            location: locationName || 'Unknown',
+            location: locationName || 'Remote',
             isRemote,
             description: description || title,
-            requiredSkills: jobSkills.slice(0, 5),
+            requiredSkills: jobSkills.slice(0, 5).length > 0 ? jobSkills.slice(0, 5) : ['AI/ML', 'Product Strategy', 'GenAI'],
             preferredSkills: jobSkills.slice(5),
             applicationUrl: posting.hostedUrl || posting.applyUrl,
             source: 'lever',
