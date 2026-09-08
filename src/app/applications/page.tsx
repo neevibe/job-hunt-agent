@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Sidebar from '@/components/layout/Sidebar';
 import { 
   Briefcase, 
   Clock,
@@ -23,7 +24,7 @@ import {
   Video,
   Building
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // Mock application data
 const APPLICATIONS = [
@@ -162,20 +163,47 @@ const APPLICATIONS = [
 type StatusFilter = 'all' | 'applied' | 'in_review' | 'interview' | 'rejected';
 
 export default function ApplicationsPage() {
+  const [appsList, setAppsList] = useState(APPLICATIONS);
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [selectedApp, setSelectedApp] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/queue')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.items && data.items.length > 0) {
+          const liveMapped = data.items.map((item: any) => ({
+            id: String(item.id),
+            company: item.job?.company?.name || item.platform || 'Target Company',
+            role: item.job?.title || 'AI Product Manager',
+            appliedAt: 'Recently',
+            status: item.status === 'submitted' ? 'applied' : (item.status === 'human_review' ? 'in_review' : 'applied'),
+            stage: item.status.replace(/_/g, ' ').toUpperCase(),
+            nextStep: item.humanReviewReason || 'Awaiting recruiter review',
+            score: item.matchScore || 85,
+            cvUsed: 'Tailored AI PM Resume',
+            events: [
+              { type: 'submit', message: `Processed via ${item.platform}`, time: 'Recently' }
+            ],
+            url: item.job?.applicationUrl || 'https://careers.google.com'
+          }));
+          setAppsList(liveMapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
   
-  const filteredApps = APPLICATIONS.filter(app => {
+  const filteredApps = appsList.filter(app => {
     if (filter === 'all') return true;
     return app.status === filter;
   });
 
   const stats = {
-    total: APPLICATIONS.length,
-    applied: APPLICATIONS.filter(a => a.status === 'applied').length,
-    inReview: APPLICATIONS.filter(a => a.status === 'in_review').length,
-    interview: APPLICATIONS.filter(a => a.status === 'interview').length,
-    rejected: APPLICATIONS.filter(a => a.status === 'rejected').length
+    total: appsList.length,
+    applied: appsList.filter(a => a.status === 'applied').length,
+    inReview: appsList.filter(a => a.status === 'in_review').length,
+    interview: appsList.filter(a => a.status === 'interview').length,
+    rejected: appsList.filter(a => a.status === 'rejected').length
   };
 
   const getStatusIcon = (status: string) => {
@@ -230,55 +258,7 @@ export default function ApplicationsPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-screen w-64 border-r border-border bg-card p-4">
-        <Link href="/" className="flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center">
-            <Zap className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-bold text-lg">Job Hunt Agent</span>
-        </Link>
-        
-        <nav className="space-y-1">
-          <Link href="/" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <BarChart2 className="w-4 h-4" />
-              Dashboard
-            </div>
-          </Link>
-          <Link href="/jobs" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <Search className="w-4 h-4" />
-              Jobs
-            </div>
-            <span className="px-2 py-0.5 bg-green-600/30 text-green-400 rounded-full text-xs">11</span>
-          </Link>
-          <Link href="/cv-studio" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <FileText className="w-4 h-4" />
-              CV Studio
-            </div>
-          </Link>
-          <Link href="/applications" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors bg-green-600/20 text-green-400">
-            <div className="flex items-center gap-3">
-              <Briefcase className="w-4 h-4" />
-              Applications
-            </div>
-            <span className="px-2 py-0.5 bg-green-600/30 text-green-400 rounded-full text-xs">{stats.total}</span>
-          </Link>
-          <Link href="/dna" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <Brain className="w-4 h-4" />
-              Candidate DNA
-            </div>
-          </Link>
-          <Link href="/settings" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <Settings className="w-4 h-4" />
-              Settings
-            </div>
-          </Link>
-        </nav>
-      </aside>
+      <Sidebar activePath="/applications" counts={{ jobs: 11, applications: stats.total }} />
 
       {/* Main Content */}
       <main className="ml-64 p-6">

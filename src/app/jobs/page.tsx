@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Sidebar from '@/components/layout/Sidebar';
 import { 
   Search, 
   Filter,
@@ -21,7 +22,7 @@ import {
   Target,
   Sparkles
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // Mock job data - in production this comes from the database
 const JOBS = [
@@ -219,10 +220,61 @@ type FilterStatus = 'all' | 'ready' | 'cv_ready' | 'new';
 
 export default function JobsPage() {
   const router = useRouter();
+  const [jobsList, setJobsList] = useState(JOBS);
+  const [isScanning, setIsScanning] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortKey>('score');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [showFilters, setShowFilters] = useState(false);
+
+  const loadJobs = async () => {
+    try {
+      const res = await fetch('/api/jobs/discover');
+      const data = await res.json();
+      if (data.success && data.jobs && data.jobs.length > 0) {
+        const mapped = data.jobs.map((j: any) => ({
+          id: String(j.id),
+          title: j.title,
+          company: j.company,
+          location: j.location || 'Remote',
+          remote: Boolean(j.isRemote),
+          salary: j.salaryMin && j.salaryMax ? `${j.salaryMin / 100000}-${j.salaryMax / 100000} LPA` : 'Competitive',
+          score: j.score || 78,
+          source: j.source || 'Direct',
+          postedAt: 'Recently',
+          skills: j.requiredSkills || ['AI', 'Product Strategy'],
+          aiRequirements: j.title.includes('AI') ? 'AI product leadership & technical depth' : 'Product ownership',
+          status: j.score >= 85 ? 'ready' : (j.score >= 75 ? 'cv_ready' : 'new'),
+          strengths: j.strengths?.length > 0 ? j.strengths : ['AI platform', '0→1 experience'],
+          gaps: j.gaps || [],
+          url: j.applicationUrl || 'https://careers.google.com'
+        }));
+        setJobsList(mapped);
+      }
+    } catch (err) {
+      console.error('Failed to load live jobs:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadJobs();
+  }, []);
+
+  const handleRunDiscovery = async () => {
+    setIsScanning(true);
+    try {
+      await fetch('/api/jobs/discover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: 'AI Product Manager' }),
+      });
+      await loadJobs();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsScanning(false);
+    }
+  };
 
   const handleApply = (job: typeof JOBS[0]) => {
     window.open(job.url, '_blank');
@@ -236,7 +288,7 @@ export default function JobsPage() {
     router.push(`/cv-studio?job=${job.id}&company=${encodeURIComponent(job.company)}`);
   };
   
-  const filteredJobs = JOBS
+  const filteredJobs = jobsList
     .filter(job => {
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -280,55 +332,7 @@ export default function JobsPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-screen w-64 border-r border-border bg-card p-4">
-        <Link href="/" className="flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center">
-            <Zap className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-bold text-lg">Job Hunt Agent</span>
-        </Link>
-        
-        <nav className="space-y-1">
-          <Link href="/" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <BarChart2 className="w-4 h-4" />
-              Dashboard
-            </div>
-          </Link>
-          <Link href="/jobs" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors bg-green-600/20 text-green-400">
-            <div className="flex items-center gap-3">
-              <Search className="w-4 h-4" />
-              Jobs
-            </div>
-            <span className="px-2 py-0.5 bg-green-600/30 text-green-400 rounded-full text-xs">{JOBS.length}</span>
-          </Link>
-          <Link href="/cv-studio" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <FileText className="w-4 h-4" />
-              CV Studio
-            </div>
-          </Link>
-          <Link href="/applications" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <Briefcase className="w-4 h-4" />
-              Applications
-            </div>
-            <span className="px-2 py-0.5 bg-green-600/30 text-green-400 rounded-full text-xs">8</span>
-          </Link>
-          <Link href="/dna" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <Brain className="w-4 h-4" />
-              Candidate DNA
-            </div>
-          </Link>
-          <Link href="/settings" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <Settings className="w-4 h-4" />
-              Settings
-            </div>
-          </Link>
-        </nav>
-      </aside>
+      <Sidebar activePath="/jobs" counts={{ jobs: jobsList.length, applications: 8 }} />
 
       {/* Main Content */}
       <main className="ml-64 p-6">
@@ -336,11 +340,15 @@ export default function JobsPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold mb-1">Job Discovery</h1>
-            <p className="text-muted-foreground text-sm">{JOBS.length} opportunities found · Last scan 10:42 AM</p>
+            <p className="text-muted-foreground text-sm">{jobsList.length} opportunities found · {isScanning ? 'Scanning platforms...' : 'Ready'}</p>
           </div>
-          <button className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium flex items-center gap-2">
-            <Sparkles className="w-4 h-4" />
-            Run Discovery
+          <button 
+            onClick={handleRunDiscovery}
+            disabled={isScanning}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 rounded-lg text-sm font-medium flex items-center gap-2 transition-all cursor-pointer"
+          >
+            <Sparkles className={`w-4 h-4 ${isScanning ? 'animate-spin' : ''}`} />
+            {isScanning ? 'Scanning...' : 'Run Discovery'}
           </button>
         </div>
 

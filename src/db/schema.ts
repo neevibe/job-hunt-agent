@@ -280,6 +280,9 @@ export const outreach = pgTable('outreach', {
 export const agentRun = pgTable('agent_run', {
   id: serial('id').primaryKey(),
   agentName: text('agent_name').notNull(),
+  agentType: text('agent_type'), // discovery, scoring, cv_tailoring, application, research, analytics
+  jobId: integer('job_id'),
+  applicationId: integer('application_id'),
   input: jsonb('input'),
   output: jsonb('output'),
   status: text('status').notNull(), // running, success, failed
@@ -290,15 +293,168 @@ export const agentRun = pgTable('agent_run', {
 });
 
 // ========================================
+// AUTONOMOUS MODE CONFIGURATION
+// ========================================
+
+export const autonomousConfig = pgTable('autonomous_config', {
+  id: serial('id').primaryKey(),
+  candidateId: integer('candidate_id').references(() => candidate.id),
+  isEnabled: boolean('is_enabled').default(false),
+  dailyApplicationLimit: integer('daily_application_limit').default(100),
+  minimumMatchScore: integer('minimum_match_score').default(75),
+  autoApplyThreshold: integer('auto_apply_threshold').default(85),
+  humanReviewThreshold: integer('human_review_threshold').default(65),
+  maxApplicationsPerPlatform: integer('max_applications_per_platform').default(30),
+  targetLocations: text('target_locations').array(),
+  targetTitles: text('target_titles').array(),
+  targetCompanies: text('target_companies').array(),
+  blacklistedCompanies: text('blacklisted_companies').array(),
+  preferredIndustries: text('preferred_industries').array(),
+  preferredPlatforms: text('preferred_platforms').array(),
+  remotePreference: text('remote_preference').default('any'), // remote, hybrid, onsite, any
+  minExperience: integer('min_experience'),
+  maxExperience: integer('max_experience'),
+  salaryMin: integer('salary_min'),
+  salaryMax: integer('salary_max'),
+  salaryCurrency: text('salary_currency').default('INR'),
+  visaRequirements: text('visa_requirements'),
+  autoSubmitEnabled: boolean('auto_submit_enabled').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// ========================================
+// APPLICATION QUEUE
+// ========================================
+
+export const applicationQueue = pgTable('application_queue', {
+  id: serial('id').primaryKey(),
+  jobId: integer('job_id').references(() => job.id).notNull(),
+  candidateId: integer('candidate_id').references(() => candidate.id).notNull(),
+  applicationId: integer('application_id').references(() => application.id),
+  cvId: integer('cv_id').references(() => cv.id),
+  status: text('status').notNull().default('discovered'),
+  priority: integer('priority').default(50),
+  matchScore: integer('match_score'),
+  platform: text('platform').notNull(),
+  retryCount: integer('retry_count').default(0),
+  maxRetries: integer('max_retries').default(3),
+  failureReason: text('failure_reason'),
+  failedAtStep: text('failed_at_step'),
+  humanReviewReason: text('human_review_reason'),
+  confirmationId: text('confirmation_id'),
+  screenshotPath: text('screenshot_path'),
+  scheduledFor: timestamp('scheduled_for'),
+  startedAt: timestamp('started_at'),
+  completedAt: timestamp('completed_at'),
+  lockedBy: text('locked_by'),
+  lockedAt: timestamp('locked_at'),
+  deduplicationHash: text('deduplication_hash'),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+// ========================================
+// EVIDENCE BANK
+// ========================================
+
+export const evidenceBank = pgTable('evidence_bank', {
+  id: serial('id').primaryKey(),
+  candidateId: integer('candidate_id').references(() => candidate.id),
+  category: text('category').notNull(), // achievement, metric, skill, project, responsibility
+  title: text('title').notNull(),
+  context: text('context'),
+  situation: text('situation'),
+  problem: text('problem'),
+  action: text('action'),
+  result: text('result'),
+  productOwnership: text('product_ownership'),
+  technology: text('technology'),
+  stakeholders: text('stakeholders'),
+  metric: text('metric'),
+  businessImpact: text('business_impact'),
+  userImpact: text('user_impact'),
+  source: text('source'),
+  isVerified: boolean('is_verified').default(true),
+  tags: text('tags').array(),
+  relatedExperienceId: integer('related_experience_id').references(() => experience.id),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// ========================================
+// AGENT ACTIVITY LOG
+// ========================================
+
+export const agentActivity = pgTable('agent_activity', {
+  id: serial('id').primaryKey(),
+  agentName: text('agent_name').notNull(),
+  actionType: text('action_type').notNull(), // search, analyze, score, tailor_cv, apply, verify, error, info
+  message: text('message').notNull(),
+  details: jsonb('details'),
+  jobId: integer('job_id'),
+  applicationId: integer('application_id'),
+  severity: text('severity').default('info'), // info, warning, error, success
+  timestamp: timestamp('timestamp').defaultNow(),
+});
+
+// ========================================
+// LEARNING & ANALYTICS
+// ========================================
+
+export const learningInsight = pgTable('learning_insight', {
+  id: serial('id').primaryKey(),
+  insightType: text('insight_type').notNull(),
+  dimension: text('dimension').notNull(),
+  metric: text('metric').notNull(),
+  value: integer('value'),
+  sampleSize: integer('sample_size'),
+  recommendation: text('recommendation'),
+  periodStart: timestamp('period_start'),
+  periodEnd: timestamp('period_end'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const dailyReport = pgTable('daily_report', {
+  id: serial('id').primaryKey(),
+  reportDate: text('report_date').notNull().unique(),
+  applicationsSubmitted: integer('applications_submitted').default(0),
+  jobsDiscovered: integer('jobs_discovered').default(0),
+  jobsAnalyzed: integer('jobs_analyzed').default(0),
+  jobsQualified: integer('jobs_qualified').default(0),
+  cvsGenerated: integer('cvs_generated').default(0),
+  averageMatchScore: integer('average_match_score'),
+  averageAtsScore: integer('average_ats_score'),
+  platformBreakdown: jsonb('platform_breakdown'),
+  responsesReceived: integer('responses_received').default(0),
+  interviewsScheduled: integer('interviews_scheduled').default(0),
+  topOpportunity: jsonb('top_opportunity'),
+  bestPerformingCV: text('best_performing_cv'),
+  recommendations: text('recommendations').array(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const platformAllocationTable = pgTable('platform_allocation', {
+  id: serial('id').primaryKey(),
+  platform: text('platform').notNull(),
+  dailyTarget: integer('daily_target').default(20),
+  usedToday: integer('used_today').default(0),
+  isActive: boolean('is_active').default(true),
+  lastResetAt: timestamp('last_reset_at').defaultNow(),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+// ========================================
 // RELATIONS
 // ========================================
 
-export const candidateRelations = relations(candidate, ({ many }) => ({
+export const candidateRelations = relations(candidate, ({ many, one }) => ({
   experiences: many(experience),
   skills: many(candidateSkill),
   cvs: many(cv),
   applications: many(application),
   jobScores: many(jobScore),
+  autonomousConfig: one(autonomousConfig),
+  evidence: many(evidenceBank),
 }));
 
 export const experienceRelations = relations(experience, ({ one, many }) => ({
@@ -307,6 +463,7 @@ export const experienceRelations = relations(experience, ({ one, many }) => ({
     references: [candidate.id],
   }),
   achievements: many(achievement),
+  evidence: many(evidenceBank),
 }));
 
 export const achievementRelations = relations(achievement, ({ one }) => ({
@@ -325,6 +482,7 @@ export const jobRelations = relations(job, ({ one, many }) => ({
   scores: many(jobScore),
   cvs: many(cv),
   applications: many(application),
+  queueItems: many(applicationQueue),
 }));
 
 export const applicationRelations = relations(application, ({ one, many }) => ({
@@ -344,4 +502,41 @@ export const applicationRelations = relations(application, ({ one, many }) => ({
   events: many(applicationEvent),
   interviews: many(interview),
   outreach: many(outreach),
+}));
+
+export const applicationQueueRelations = relations(applicationQueue, ({ one }) => ({
+  job: one(job, {
+    fields: [applicationQueue.jobId],
+    references: [job.id],
+  }),
+  candidate: one(candidate, {
+    fields: [applicationQueue.candidateId],
+    references: [candidate.id],
+  }),
+  application: one(application, {
+    fields: [applicationQueue.applicationId],
+    references: [application.id],
+  }),
+  cv: one(cv, {
+    fields: [applicationQueue.cvId],
+    references: [cv.id],
+  }),
+}));
+
+export const autonomousConfigRelations = relations(autonomousConfig, ({ one }) => ({
+  candidate: one(candidate, {
+    fields: [autonomousConfig.candidateId],
+    references: [candidate.id],
+  }),
+}));
+
+export const evidenceBankRelations = relations(evidenceBank, ({ one }) => ({
+  candidate: one(candidate, {
+    fields: [evidenceBank.candidateId],
+    references: [candidate.id],
+  }),
+  experience: one(experience, {
+    fields: [evidenceBank.relatedExperienceId],
+    references: [experience.id],
+  }),
 }));

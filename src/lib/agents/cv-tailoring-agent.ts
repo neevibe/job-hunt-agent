@@ -1,6 +1,8 @@
 import { db } from '@/db';
 import { cv, job, candidate, experience, achievement, candidateSkill, jobIntelligence } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { generateText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
 
 /**
  * CV TAILORING AGENT
@@ -146,7 +148,7 @@ async function generateTailoredContent(candidateData: any, jobData: any) {
 
   return {
     // Summary tailored to the role
-    professionalSummary: generateSummary(matchingExperience, jobData),
+    professionalSummary: await generateSummary(matchingExperience, jobData),
     
     // Experience reordered by relevance
     experience: reorderExperience(matchingExperience, jobData),
@@ -292,8 +294,29 @@ function findMatchingProjects(jobData: any) {
   );
 }
 
-function generateSummary(experiences: any[], jobData: any) {
-  const topExperience = experiences[0];
+async function generateSummary(experiences: any[], jobData: any): Promise<string> {
+  if (process.env.ANTHROPIC_API_KEY) {
+    try {
+      const { text } = await generateText({
+        model: anthropic('claude-sonnet-4-20250514'),
+        system: `You are an executive CV writer tailoring an AI Product Manager's summary for a specific role.
+ABSOLUTE RULE: NEVER fabricate or exaggerate experience, metrics, or technologies.
+Only use the verified experience:
+- 10+ years building AI/ML products
+- BIAL: Built enterprise GenAI platform (EKO) processing 150M+ data points, ₹500Cr+ commercial decisions, 35% faster decisions
+- Bidgely: Scaled SaaS AI platform to 3,000+ enterprise users
+- Amazon: Predictive models, multi-million-dollar retention savings
+- Independent: Built Xyrenis (production AI project intelligence platform with hybrid AI copilot) and Jarvis (digital-twin agent with 9-tier memory)`,
+        prompt: `Write a punchy 3-4 sentence professional summary tailored specifically for this role:
+Title: ${jobData.title}
+Company: ${jobData.company?.name || 'Target Company'}
+Key requirements: ${(jobData.requiredSkills || []).join(', ')}`,
+      });
+      if (text.trim()) return text.trim();
+    } catch (e) {
+      console.warn('LLM summary generation failed, using template:', e);
+    }
+  }
   return `AI Product Manager with 10+ years building and shipping AI/ML products from concept to production. Built and deployed enterprise GenAI platform (EKO) at Bangalore International Airport processing 150M+ data points, enabling ₹500Cr+ in commercial decisions. Most recently built Xyrenis — a production AI-powered project intelligence platform with hybrid AI copilot (heuristic router + LLM fallback), shipped with zero engineering team. Also built Jarvis — a digital-twin agent with 9-tier memory system and voice capabilities on Claude Agent SDK. Expertise spans GenAI, LLMs, predictive analytics, product strategy, and cross-functional leadership of 15+ person teams.`;
 }
 

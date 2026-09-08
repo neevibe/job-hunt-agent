@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Sidebar from '@/components/layout/Sidebar';
 import { 
   FileText, 
   Download,
@@ -144,10 +145,65 @@ Specialized in bridging AI capabilities with real business problems. Built EKO (
 `;
 
 export default function CVStudioPage() {
+  const [cvList, setCvList] = useState(CVS);
   const [selectedCV, setSelectedCV] = useState<string | null>('1');
-  const [showPreview, setShowPreview] = useState(false);
+  const [currentContent, setCurrentContent] = useState(SAMPLE_RESUME);
+  const [isGenerating, setIsGenerating] = useState(false);
   
-  const selectedCVData = CVS.find(cv => cv.id === selectedCV);
+  const selectedCVData = cvList.find(cv => cv.id === selectedCV) || cvList[0];
+
+  const handleGenerateCV = async () => {
+    setIsGenerating(true);
+    try {
+      const res = await fetch('/api/cv/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          job: {
+            title: 'Senior AI Product Manager',
+            company: 'Anthropic',
+            skills: ['LLM', 'GenAI', 'Product Strategy', 'Agent Systems'],
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.cv) {
+        const newCvItem = {
+          id: String(Date.now()),
+          name: `Tailored - ${data.cv.targetCompany}`,
+          targetJob: data.cv.targetJob,
+          company: data.cv.targetCompany,
+          createdAt: 'Just now',
+          atsScore: data.cv.atsScore || 94,
+          status: 'ready',
+          highlights: ['EKO Platform', 'LLM Agent Systems', '0→1 PM', 'Enterprise AI'],
+          sections: ['Summary', 'Experience', 'Projects', 'Skills', 'Education']
+        };
+        setCvList([newCvItem, ...cvList]);
+        setSelectedCV(newCvItem.id);
+        if (data.cv.content) {
+          setCurrentContent(data.cv.content);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to generate tailored CV:', err);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(currentContent);
+  };
+
+  const handleDownload = () => {
+    const blob = new Blob([currentContent], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Neeraj_Prakash_CV_${selectedCVData?.company || 'AI_PM'}.md`;
+    a.click();
+  };
 
   const getATSColor = (score: number) => {
     if (score >= 90) return 'text-green-400';
@@ -158,55 +214,7 @@ export default function CVStudioPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-screen w-64 border-r border-border bg-card p-4">
-        <Link href="/" className="flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-green-600 flex items-center justify-center">
-            <Zap className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-bold text-lg">Job Hunt Agent</span>
-        </Link>
-        
-        <nav className="space-y-1">
-          <Link href="/" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <BarChart2 className="w-4 h-4" />
-              Dashboard
-            </div>
-          </Link>
-          <Link href="/jobs" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <Search className="w-4 h-4" />
-              Jobs
-            </div>
-            <span className="px-2 py-0.5 bg-green-600/30 text-green-400 rounded-full text-xs">11</span>
-          </Link>
-          <Link href="/cv-studio" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors bg-green-600/20 text-green-400">
-            <div className="flex items-center gap-3">
-              <FileText className="w-4 h-4" />
-              CV Studio
-            </div>
-          </Link>
-          <Link href="/applications" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <Briefcase className="w-4 h-4" />
-              Applications
-            </div>
-            <span className="px-2 py-0.5 bg-green-600/30 text-green-400 rounded-full text-xs">8</span>
-          </Link>
-          <Link href="/dna" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <Brain className="w-4 h-4" />
-              Candidate DNA
-            </div>
-          </Link>
-          <Link href="/settings" className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <div className="flex items-center gap-3">
-              <Settings className="w-4 h-4" />
-              Settings
-            </div>
-          </Link>
-        </nav>
-      </aside>
+      <Sidebar activePath="/cv-studio" counts={{ jobs: 11, applications: 8 }} />
 
       {/* Main Content */}
       <main className="ml-64 p-6">
@@ -215,12 +223,16 @@ export default function CVStudioPage() {
           <div>
             <h1 className="text-2xl font-bold mb-1">CV Studio</h1>
             <p className="text-muted-foreground text-sm">
-              AI-tailored resumes for each opportunity · {CVS.length} versions
+              AI-tailored resumes for each opportunity · {cvList.length} versions
             </p>
           </div>
-          <button className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Generate New CV
+          <button 
+            onClick={handleGenerateCV}
+            disabled={isGenerating}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 rounded-lg text-sm font-medium flex items-center gap-2 cursor-pointer transition-all"
+          >
+            <Plus className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />
+            {isGenerating ? 'Tailoring with AI...' : 'Generate New CV'}
           </button>
         </div>
 
@@ -229,7 +241,7 @@ export default function CVStudioPage() {
           <div className="space-y-4">
             <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Your CVs</h2>
             
-            {CVS.map((cv) => (
+            {cvList.map((cv) => (
               <div 
                 key={cv.id}
                 onClick={() => setSelectedCV(cv.id)}
@@ -276,20 +288,11 @@ export default function CVStudioPage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button className="p-2 hover:bg-secondary rounded-lg transition-colors" title="Preview">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 hover:bg-secondary rounded-lg transition-colors" title="Edit">
-                      <Edit3 className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 hover:bg-secondary rounded-lg transition-colors" title="Copy">
+                    <button onClick={handleCopy} className="p-2 hover:bg-secondary rounded-lg transition-colors cursor-pointer" title="Copy">
                       <Copy className="w-4 h-4" />
                     </button>
-                    <button className="p-2 hover:bg-secondary rounded-lg transition-colors" title="Download PDF">
+                    <button onClick={handleDownload} className="p-2 hover:bg-secondary rounded-lg transition-colors cursor-pointer" title="Download">
                       <Download className="w-4 h-4" />
-                    </button>
-                    <button className="p-2 hover:bg-secondary rounded-lg text-red-400 transition-colors" title="Delete">
-                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
@@ -344,20 +347,27 @@ export default function CVStudioPage() {
                 <div className="p-6 max-h-[600px] overflow-y-auto">
                   <div className="prose prose-invert prose-sm max-w-none">
                     <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">
-                      {SAMPLE_RESUME}
+                      {currentContent}
                     </pre>
                   </div>
                 </div>
 
                 {/* Actions */}
                 <div className="p-4 border-t border-border flex gap-3">
-                  <button className="flex-1 px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm flex items-center justify-center gap-2">
-                    <Sparkles className="w-4 h-4" />
-                    Improve with AI
+                  <button 
+                    onClick={handleGenerateCV}
+                    disabled={isGenerating}
+                    className="flex-1 px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    <Sparkles className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />
+                    {isGenerating ? 'Refining with AI...' : 'Improve with AI'}
                   </button>
-                  <button className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                  <button 
+                    onClick={handleDownload}
+                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium flex items-center justify-center gap-2 cursor-pointer"
+                  >
                     <Download className="w-4 h-4" />
-                    Export PDF
+                    Export Markdown / PDF
                   </button>
                 </div>
               </div>
