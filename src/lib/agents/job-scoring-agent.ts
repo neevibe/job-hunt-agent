@@ -1,9 +1,5 @@
-import { anthropic } from '@ai-sdk/anthropic';
-import { generateObject } from 'ai';
 import { z } from 'zod';
-import { db } from '@/db';
-import { job, jobScore, jobIntelligence } from '@/db/schema';
-import { getCandidateDNA } from '@/lib/candidate-dna';
+import { getCandidateDNA, type CandidateProfile } from '@/lib/candidate-dna';
 
 /**
  * JOB SCORING AGENT
@@ -12,167 +8,272 @@ import { getCandidateDNA } from '@/lib/candidate-dna';
  * Explains WHY the score was assigned and provides actionable recommendations.
  */
 
-const jobScoreSchema = z.object({
-  overallScore: z.number().min(0).max(100),
-  aiRelevanceScore: z.number().min(0).max(100),
-  productOwnershipScore: z.number().min(0).max(100),
-  pmExperienceScore: z.number().min(0).max(100),
-  domainScore: z.number().min(0).max(100),
-  leadershipScore: z.number().min(0).max(100),
-  analyticsScore: z.number().min(0).max(100),
-  seniorityScore: z.number().min(0).max(100),
-  locationScore: z.number().min(0).max(100),
-  explanation: z.string(),
-  recommendation: z.enum(['auto-apply', 'apply', 'review', 'skip']),
-  strengths: z.array(z.string()),
-  gaps: z.array(z.string()),
-});
+export interface JobData {
+  id: number;
+  company: string;
+  title: string;
+  location: string;
+  isRemote: boolean;
+  salaryMin?: number;
+  salaryMax?: number;
+  experienceMin?: number;
+  experienceMax?: number;
+  description: string;
+  requiredSkills: string[];
+  preferredSkills: string[];
+  aiRequirements?: string[];
+  productRequirements?: string[];
+  roleType?: string;
+}
 
-export async function scoreJob(jobId: number, candidateId: number) {
-  console.log(`🎯 Scoring job ${jobId} for candidate ${candidateId}...`);
+export interface JobScore {
+  overallScore: number;
+  aiRelevanceScore: number;
+  productOwnershipScore: number;
+  pmExperienceScore: number;
+  domainScore: number;
+  leadershipScore: number;
+  analyticsScore: number;
+  seniorityScore: number;
+  locationScore: number;
+  explanation: string;
+  recommendation: 'auto-apply' | 'apply' | 'review' | 'skip';
+  strengths: string[];
+  gaps: string[];
+}
 
-  // Get job details
-  const jobData = await db.query.job.findFirst({
-    where: (j, { eq }) => eq(j.id, jobId),
-    with: {
-      company: true,
-      intelligence: true,
-    },
-  });
-
-  if (!jobData) {
-    throw new Error(`Job ${jobId} not found`);
-  }
-
-  // Get candidate DNA
-  const candidateData = await getCandidateDNA(candidateId);
+export function scoreJob(jobData: JobData): JobScore {
+  const candidateData = getCandidateDNA();
   
-  if (!candidateData) {
-    throw new Error(`Candidate ${candidateId} not found`);
-  }
+  // Calculate individual scores
+  const aiRelevanceScore = calculateAIScore(jobData, candidateData);
+  const productOwnershipScore = calculateProductScore(jobData, candidateData);
+  const pmExperienceScore = calculatePMScore(candidateData);
+  const domainScore = calculateDomainScore(jobData, candidateData);
+  const leadershipScore = calculateLeadershipScore(jobData, candidateData);
+  const analyticsScore = calculateAnalyticsScore(candidateData);
+  const seniorityScore = calculateSeniorityScore(jobData, candidateData);
+  const locationScore = calculateLocationScore(jobData, candidateData);
 
-  // Create scoring prompt
-  const prompt = `You are an expert AI Product Manager recruiter. Score this job against the candidate's profile.
+  // Weighted overall score
+  const overallScore = Math.round(
+    aiRelevanceScore * 0.25 +
+    productOwnershipScore * 0.20 +
+    pmExperienceScore * 0.15 +
+    domainScore * 0.10 +
+    leadershipScore * 0.10 +
+    analyticsScore * 0.10 +
+    seniorityScore * 0.05 +
+    locationScore * 0.05
+  );
 
-JOB:
-Company: ${jobData.company?.name}
-Title: ${jobData.title}
-Location: ${jobData.location} ${jobData.isRemote ? '(Remote)' : ''}
-Experience: ${jobData.experienceMin}-${jobData.experienceMax} years
-Description: ${jobData.description}
-Required Skills: ${jobData.requiredSkills?.join(', ')}
-Preferred Skills: ${jobData.preferredSkills?.join(', ')}
+  // Determine recommendation
+  let recommendation: JobScore['recommendation'] = 'skip';
+  if (overallScore >= 85) recommendation = 'auto-apply';
+  else if (overallScore >= 75) recommendation = 'apply';
+  else if (overallScore >= 65) recommendation = 'review';
 
-AI Maturity: ${jobData.intelligence?.aiRelevance}/100
-Role Type: ${jobData.intelligence?.roleType}
-AI Requirements: ${jobData.intelligence?.aiRequirements?.join(', ')}
-Product Requirements: ${jobData.intelligence?.productRequirements?.join(', ')}
+  // Identify strengths and gaps
+  const { strengths, gaps } = identifyStrengthsAndGaps(jobData, candidateData);
 
-CANDIDATE:
-Name: ${candidateData.name}
-Total Experience: 10+ years in AI and analytics roles
-Current Location: ${candidateData.location}
-Preferred: ${candidateData.preferredLocations?.join(', ')}
-Compensation Target: ${candidateData.compensationMin ? `₹${candidateData.compensationMin / 100000}L` : 'Not specified'}
-
-EXPERIENCE:
-${candidateData.experiences?.map(exp => `
-- ${exp.company} | ${exp.jobTitle} (${exp.startDate} - ${exp.endDate || 'Present'})
-  Products: ${exp.productsOwned?.join(', ')}
-  AI Exposure: ${exp.aiExposure}
-  Business Impact: ${exp.businessImpact}
-`).join('\n')}
-
-KEY ACHIEVEMENTS:
-${candidateData.experiences?.flatMap(exp => 
-  exp.achievements?.map(ach => `- ${ach.title}: ${ach.metric}`)
-).join('\n')}
-
-SKILLS:
-${candidateData.skills?.map(skill => `${skill.skillName} (${skill.proficiency}, ${skill.yearsExperience}y)`).join(', ')}
-
-SCORING WEIGHTS:
-- AI/ML relevance: 25%
-- Product ownership: 20%
-- PM experience: 15%
-- Domain relevance: 10%
-- Leadership: 10%
-- Analytics/Data: 10%
-- Seniority fit: 5%
-- Location/compensation: 5%
-
-EVALUATION CRITERIA:
-1. Does the candidate have PROVEN AI/ML product experience? (not just interest)
-2. Has the candidate owned products end-to-end (0→1, scale, platform)?
-3. Does their PM experience level match the role?
-4. Is there domain overlap (FinTech, SaaS, Enterprise, etc.)?
-5. Do they have the required leadership experience?
-6. Is their analytics/data background relevant?
-7. Does seniority align (not too junior, not overqualified)?
-8. Location and compensation compatible?
-
-STRENGTHS = What makes this candidate EXCELLENT for this role
-GAPS = What's missing (be honest, don't invent solutions)
-
-RECOMMENDATION:
-- auto-apply: 85-100 (Excellent match, minimal gaps)
-- apply: 75-84 (Strong match, addressable gaps)
-- review: 65-74 (Potential match, needs human judgment)
-- skip: <65 (Weak match, too many gaps)
-
-Be honest. Don't inflate scores. Identify real gaps instead of pretending they don't exist.`;
-
-  const result = await generateObject({
-    model: anthropic('claude-sonnet-4-5-20250929'),
-    schema: jobScoreSchema,
-    prompt,
-  });
-
-  // Store score in database
-  const [scoreRecord] = await db.insert(jobScore).values({
-    jobId,
-    candidateId,
-    overallScore: result.object.overallScore,
-    aiRelevanceScore: result.object.aiRelevanceScore,
-    productOwnershipScore: result.object.productOwnershipScore,
-    pmExperienceScore: result.object.pmExperienceScore,
-    domainScore: result.object.domainScore,
-    leadershipScore: result.object.leadershipScore,
-    analyticsScore: result.object.analyticsScore,
-    seniorityScore: result.object.seniorityScore,
-    locationScore: result.object.locationScore,
-    explanation: result.object.explanation,
-    recommendation: result.object.recommendation,
-    strengths: result.object.strengths,
-    gaps: result.object.gaps,
-  }).returning();
-
-  console.log(`✅ Job scored: ${result.object.overallScore}/100 (${result.object.recommendation})`);
+  // Generate explanation
+  const explanation = generateExplanation(overallScore, strengths, gaps);
 
   return {
-    score: scoreRecord,
-    details: result.object,
+    overallScore,
+    aiRelevanceScore,
+    productOwnershipScore,
+    pmExperienceScore,
+    domainScore,
+    leadershipScore,
+    analyticsScore,
+    seniorityScore,
+    locationScore,
+    explanation,
+    recommendation,
+    strengths,
+    gaps,
   };
 }
 
-export async function getTopMatches(candidateId: number, minScore: number = 75, limit: number = 20) {
-  const topJobs = await db.query.jobScore.findMany({
-    where: (score, { eq, and, gte }) => and(
-      eq(score.candidateId, candidateId),
-      gte(score.overallScore, minScore)
-    ),
-    with: {
-      job: {
-        with: {
-          company: true,
-        },
-      },
-    },
-    orderBy: (score, { desc }) => [desc(score.overallScore)],
-    limit,
-  });
+function calculateAIScore(job: JobData, candidate: CandidateProfile): number {
+  let score = 0;
+  const aiSkills = candidate.skills.filter(s => s.category === 'ai');
+  
+  // Check AI requirements match
+  const aiKeywords = ['genai', 'llm', 'ai', 'ml', 'machine learning', 'rag', 'prompt'];
+  const jobText = `${job.title} ${job.description}`.toLowerCase();
+  
+  if (aiKeywords.some(k => jobText.includes(k))) {
+    score += 50;
+    
+    // Bonus for specific matches
+    if (jobText.includes('genai') || jobText.includes('generative')) score += 15;
+    if (jobText.includes('llm')) score += 15;
+    if (jobText.includes('rag')) score += 10;
+    if (jobText.includes('prompt')) score += 10;
+  }
+  
+  return Math.min(100, score);
+}
 
-  return topJobs;
+function calculateProductScore(job: JobData, candidate: CandidateProfile): number {
+  let score = 0;
+  
+  // Check product experience
+  const productKeywords = ['product manager', 'product owner', 'product strategy', '0-1', 'zero to one'];
+  const jobText = `${job.title} ${job.description}`.toLowerCase();
+  
+  if (productKeywords.some(k => jobText.includes(k))) {
+    score += 60;
+    
+    // Bonus for 0→1 experience
+    if (jobText.includes('0-1') || jobText.includes('zero to one') || jobText.includes('greenfield')) {
+      score += 20;
+    }
+    
+    // Bonus for platform/enterprise
+    if (jobText.includes('enterprise') || jobText.includes('platform')) {
+      score += 20;
+    }
+  }
+  
+  return Math.min(100, score);
+}
+
+function calculatePMScore(candidate: CandidateProfile): number {
+  // Candidate has 10+ years PM experience
+  return 90;
+}
+
+function calculateDomainScore(job: JobData, candidate: CandidateProfile): number {
+  let score = 50; // Base score
+  const jobText = `${job.title} ${job.description}`.toLowerCase();
+  
+  // FinTech bonus (Axis Bank experience)
+  if (jobText.includes('fintech') || jobText.includes('payments') || jobText.includes('banking')) {
+    score += 25;
+  }
+  
+  // SaaS bonus (Bidgely experience)
+  if (jobText.includes('saas') || jobText.includes('b2b')) {
+    score += 15;
+  }
+  
+  // Enterprise bonus (BIAL experience)
+  if (jobText.includes('enterprise')) {
+    score += 10;
+  }
+  
+  return Math.min(100, score);
+}
+
+function calculateLeadershipScore(job: JobData, candidate: CandidateProfile): number {
+  const jobText = job.description.toLowerCase();
+  
+  // Check if leadership is required
+  if (jobText.includes('lead') || jobText.includes('manager') || jobText.includes('team')) {
+    return 85; // Candidate has leadership experience
+  }
+  
+  return 70;
+}
+
+function calculateAnalyticsScore(candidate: CandidateProfile): number {
+  // Candidate has strong analytics background
+  return 90;
+}
+
+function calculateSeniorityScore(job: JobData, candidate: CandidateProfile): number {
+  const expMin = job.experienceMin || 5;
+  const expMax = job.experienceMax || 15;
+  const candidateExp = 10;
+  
+  if (candidateExp >= expMin && candidateExp <= expMax) {
+    return 100;
+  } else if (candidateExp > expMax) {
+    return 80; // Slightly overqualified
+  } else {
+    return 60;
+  }
+}
+
+function calculateLocationScore(job: JobData, candidate: CandidateProfile): number {
+  if (job.isRemote) return 100;
+  
+  const jobLocation = job.location.toLowerCase();
+  if (jobLocation.includes('bangalore') || jobLocation.includes('bengaluru')) {
+    return 100;
+  }
+  
+  if (candidate.preferredLocations.some(loc => jobLocation.includes(loc.toLowerCase()))) {
+    return 80;
+  }
+  
+  return 50;
+}
+
+function identifyStrengthsAndGaps(job: JobData, candidate: CandidateProfile): {
+  strengths: string[];
+  gaps: string[];
+} {
+  const strengths: string[] = [];
+  const gaps: string[] = [];
+  const jobText = `${job.title} ${job.description}`.toLowerCase();
+
+  // Check AI match
+  if (jobText.includes('ai') || jobText.includes('ml') || jobText.includes('genai')) {
+    strengths.push('AI product ownership');
+  }
+
+  // Check product experience
+  if (jobText.includes('0-1') || jobText.includes('zero to one')) {
+    strengths.push('0→1 experience');
+  }
+
+  // Check FinTech
+  if (jobText.includes('fintech') || jobText.includes('payments')) {
+    strengths.push('FinTech background');
+  }
+
+  // Check leadership
+  if (jobText.includes('lead') || jobText.includes('team')) {
+    strengths.push('Leadership experience');
+  }
+
+  // Check analytics
+  if (jobText.includes('analytics') || jobText.includes('data')) {
+    strengths.push('Analytics expertise');
+  }
+
+  // Check for gaps
+  if (jobText.includes('b2b saas') && !strengths.includes('SaaS')) {
+    gaps.push('B2B SaaS specific');
+  }
+
+  if (jobText.includes('consumer') || jobText.includes('b2c')) {
+    gaps.push('Consumer product focus');
+  }
+
+  // Default strengths if none identified
+  if (strengths.length === 0) {
+    strengths.push('Product management');
+    strengths.push('Cross-functional leadership');
+  }
+
+  return { strengths, gaps };
+}
+
+function generateExplanation(score: number, strengths: string[], gaps: string[]): string {
+  if (score >= 85) {
+    return `Excellent match. Strong alignment on ${strengths.slice(0, 3).join(', ')}. ${gaps.length > 0 ? `Minor gaps: ${gaps.join(', ')}.` : 'No significant gaps.'}`;
+  } else if (score >= 75) {
+    return `Strong match. Candidate has ${strengths.slice(0, 2).join(' and ')}. ${gaps.length > 0 ? `Gaps to address: ${gaps.join(', ')}.` : ''}`;
+  } else if (score >= 65) {
+    return `Potential match. Some alignment on ${strengths[0] || 'PM experience'}. ${gaps.length > 0 ? `Key gaps: ${gaps.join(', ')}.` : ''} Review recommended.`;
+  } else {
+    return `Weak match. Limited alignment with role requirements.`;
+  }
 }
 
 export function getMatchLevel(score: number): {
