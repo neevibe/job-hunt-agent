@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   Search, 
   Filter,
@@ -217,10 +218,23 @@ type SortKey = 'score' | 'postedAt' | 'salary' | 'company';
 type FilterStatus = 'all' | 'ready' | 'cv_ready' | 'new';
 
 export default function JobsPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortKey>('score');
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [showFilters, setShowFilters] = useState(false);
+
+  const handleApply = (job: typeof JOBS[0]) => {
+    window.open(job.url, '_blank');
+  };
+
+  const handleViewDetails = (job: typeof JOBS[0]) => {
+    window.open(job.url, '_blank');
+  };
+
+  const handleTailorCV = (job: typeof JOBS[0]) => {
+    router.push(`/cv-studio?job=${job.id}&company=${encodeURIComponent(job.company)}`);
+  };
   
   const filteredJobs = JOBS
     .filter(job => {
@@ -496,14 +510,23 @@ export default function JobsPage() {
                   
                   {/* Actions */}
                   <div className="flex gap-2">
-                    <button className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors">
+                    <button 
+                      onClick={() => handleViewDetails(job)}
+                      className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors"
+                    >
                       View Details
                     </button>
-                    <button className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors flex items-center gap-1.5">
+                    <button 
+                      onClick={() => handleTailorCV(job)}
+                      className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors flex items-center gap-1.5"
+                    >
                       <FileText className="w-3.5 h-3.5" />
                       Tailor CV
                     </button>
-                    <button className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition-colors">
+                    <button 
+                      onClick={() => handleApply(job)}
+                      className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition-colors"
+                    >
                       Apply
                     </button>
                     <button className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors ml-auto">
