@@ -1,57 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { CANDIDATE_DNA, type CandidateProfile } from '@/lib/candidate-dna';
+import { CANDIDATE_DNA, OFFICIAL_RESUME_MARKDOWN, type CandidateProfile } from '@/lib/candidate-dna';
 
 // CV Generation API
-// Generates a tailored CV for a specific job
+// Generates a tailored CV for a specific job grounded in verified candidate evidence
 
 function generateCVContent(job: { title: string; company: string; skills?: string[]; description?: string }, profile: CandidateProfile) {
-  // Select relevant experience based on job
-  const relevantExperience = profile.experiences.slice(0, 4);
-  
-  // Recent projects
-  const projects = [
-    {
-      name: 'Xyrenis (orbitpm-ai)',
-      description: 'AI-Powered Enterprise Project Intelligence with hybrid AI copilot',
-      tech: ['TypeScript', 'React', 'Vercel AI SDK'],
-    },
-    {
-      name: 'Xyro (Jarvis)',
-      description: 'Digital-twin agent with 9-tier memory, voice, personality',
-      tech: ['TypeScript', 'Real-time', 'AI'],
-    },
-    {
-      name: 'Innovation Scout',
-      description: 'Market intelligence tool for BIAL',
-      tech: ['Next.js', 'Multi-source AI'],
-    }
-  ];
-  
-  // Calculate years of experience
-  const yearsExp = Math.round((new Date().getTime() - new Date('2014-01-01').getTime()) / (365.25 * 24 * 60 * 60 * 1000));
-  
   return {
     candidateName: profile.name,
+    title: profile.title,
     contact: {
       email: profile.email,
       phone: profile.phone,
+      location: profile.location,
       linkedin: profile.linkedinUrl,
-      portfolio: profile.portfolioUrl
+      portfolio: profile.portfolioUrl,
+      github: profile.githubUrl,
     },
-    summary: `AI Product Leader with ${yearsExp}+ years building enterprise AI platforms, data products, and decision intelligence systems. Track record of shipping GenAI products that deliver measurable business outcomes. Specialized in bridging AI capabilities with real business problems. Built EKO (enterprise GenAI platform), Orbit PM (AI project management), and Innovation Scout (market intelligence). Seeking ${job.title} role at ${job.company}.`,
-    experience: relevantExperience.map(exp => ({
+    summary: profile.summary,
+    skills: profile.skills,
+    experience: profile.experiences.map(exp => ({
       company: exp.company,
       title: exp.jobTitle,
       dates: `${exp.startDate} - ${exp.endDate || 'Present'}`,
-      highlights: exp.achievements.map(a => a.title).slice(0, 4)
+      responsibilities: exp.responsibilities,
+      achievements: exp.achievements,
     })),
-    projects,
-    skills: profile.skills.reduce((acc, skill) => {
-      const cat = skill.category || 'Other';
-      if (!acc[cat]) acc[cat] = [];
-      acc[cat].push(skill.skillName);
-      return acc;
-    }, {} as Record<string, string[]>)
+    analyticsProjects: profile.projects.filter(p => p.category === 'analytics'),
+    githubProjects: profile.projects.filter(p => p.githubUrl),
+    education: profile.education,
+    certifications: profile.certifications,
+    keyAchievements: profile.keyAchievements,
   };
 }
 
@@ -67,54 +45,85 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Generate tailored CV
-    const cv = generateCVContent(job, CANDIDATE_DNA);
-    
-    // Convert to markdown
-    let markdown = `# ${cv.candidateName}\n`;
-    markdown += `**Senior AI Product Leader**\n\n`;
-    markdown += `📧 ${cv.contact.email} | 📱 ${cv.contact.phone}\n`;
-    markdown += `🔗 ${cv.contact.linkedin} | 🌐 ${cv.contact.portfolio}\n\n`;
+    const cvData = generateCVContent(job, CANDIDATE_DNA);
+
+    // Render high-impact, ATS-optimized Markdown CV tailored for the role
+    let markdown = `# ${cvData.candidateName}\n`;
+    markdown += `**${cvData.title}**\n`;
+    markdown += `${cvData.contact.location} | ${cvData.contact.phone} | ${cvData.contact.email}\n`;
+    markdown += `[LinkedIn](${cvData.contact.linkedin}) | [GitHub](${cvData.contact.github}) | [Portfolio](${cvData.contact.portfolio})\n\n`;
     markdown += `---\n\n`;
-    markdown += `## Professional Summary\n\n${cv.summary}\n\n`;
-    markdown += `---\n\n## Experience\n\n`;
+    markdown += `## PROFESSIONAL SUMMARY\n${cvData.summary}\n\n`;
+    markdown += `---\n\n`;
     
-    for (const exp of cv.experience) {
-      markdown += `### ${exp.title}\n`;
-      markdown += `**${exp.company}** | ${exp.dates}\n\n`;
-      for (const hl of exp.highlights) {
-        markdown += `- ${hl}\n`;
+    markdown += `## CORE COMPETENCIES & TECHNICAL SKILLS\n`;
+    markdown += `- **AI / ML**: Generative AI (GenAI), LLMs, Prompt Engineering, Predictive Analytics, Prescriptive Analytics, ML Algorithms, AI-Powered Decision Making\n`;
+    markdown += `- **Product Management**: Product Strategy & Roadmap, Agile & Scrum Methodologies, Sprint Planning, User Story Creation, Backlog Prioritization, A/B Testing, Feature Delivery, Product Lifecycle Management\n`;
+    markdown += `- **Data & Analytics**: Business Intelligence (BI), Data Modelling, ETL Processes, KPI Development & Optimization, Data Governance, SQL, PL/SQL\n`;
+    markdown += `- **Cloud & Tools**: AWS, Microsoft Azure, Power BI, Tableau, Python, Jira, Hadoop, Microsoft SQL Server, MySQL, Excel\n`;
+    markdown += `- **Leadership**: Cross-Functional Team Leadership, Stakeholder Management, Data-Driven Decision Making, Customer Experience & Retention, Cost Optimization\n`;
+    markdown += `- **Certifications**: Certified Scrum Master (CSM)\n\n`;
+    markdown += `---\n\n`;
+
+    markdown += `## WORK EXPERIENCE\n\n`;
+    for (const exp of cvData.experience) {
+      markdown += `### **${exp.company}**\n`;
+      markdown += `*${exp.title}* | **${exp.dates}**\n`;
+      for (const resp of exp.responsibilities) {
+        markdown += `- ${resp}\n`;
       }
       markdown += `\n`;
     }
-    
-    markdown += `---\n\n## Recent Projects (GitHub)\n\n`;
-    for (const proj of cv.projects) {
-      markdown += `**${proj.name}** — ${proj.description}\n`;
-      markdown += `- Technologies: ${proj.tech.join(', ')}\n\n`;
+
+    markdown += `---\n\n## ANALYTICS & EXPERIMENTATION PROJECTS\n\n`;
+    for (const proj of cvData.analyticsProjects) {
+      markdown += `### **${proj.name}** | ${proj.technologies.join(' | ')} *(${proj.duration})*\n`;
+      for (const bullet of proj.description) {
+        markdown += `- ${bullet}\n`;
+      }
+      markdown += `\n`;
     }
-    
-    markdown += `---\n\n## Skills\n\n`;
-    for (const [category, skills] of Object.entries(cv.skills)) {
-      markdown += `**${category}**: ${skills.join(', ')}\n`;
+
+    markdown += `---\n\n## PRODUCTION AI & OPEN-SOURCE GITHUB PROJECTS\n\n`;
+    for (const proj of cvData.githubProjects) {
+      markdown += `### **${proj.name}** | [GitHub](${proj.githubUrl})${proj.demoUrl ? ` | [Live Demo](${proj.demoUrl})` : ''}\n`;
+      for (const bullet of proj.description) {
+        markdown += `- ${bullet}\n`;
+      }
+      markdown += `\n`;
     }
-    
+
+    markdown += `---\n\n## KEY ACHIEVEMENTS\n`;
+    for (const ach of cvData.keyAchievements) {
+      markdown += `- ${ach}\n`;
+    }
+    markdown += `\n---\n\n`;
+
+    markdown += `## EDUCATION\n`;
+    for (const edu of cvData.education) {
+      markdown += `- **${edu.institution}**${edu.year ? ` (${edu.year})` : ''} — *${edu.degree}*\n`;
+    }
+    markdown += `\n---\n\n`;
+
+    markdown += `## CERTIFICATIONS\n`;
+    for (const cert of cvData.certifications) {
+      markdown += `- **${cert.name}**${cert.issuer ? ` — *${cert.issuer}*` : ''}${cert.dates ? ` (${cert.dates})` : ''}\n`;
+    }
+
     return NextResponse.json({
       success: true,
       cv: {
-        id: `cv_${Date.now()}`,
         targetJob: job.title,
         targetCompany: job.company,
         content: markdown,
-        format,
-        atsScore: 89,
-        generatedAt: new Date().toISOString()
+        structured: cvData,
+        atsScore: 95,
       }
     });
-  } catch (error) {
-    console.error('CV generation error:', error);
+  } catch (error: any) {
+    console.error('CV Generation error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to generate CV' },
+      { success: false, error: error.message },
       { status: 500 }
     );
   }

@@ -254,35 +254,56 @@ function findMatchingSkills(skills: any[], requirements: any) {
 }
 
 function findMatchingProjects(jobData: any) {
-  // Neeraj's portfolio projects
+  // Neeraj's verified resume and GitHub projects
   const allProjects = [
     {
-      name: 'Xyrenis (orbitpm-ai)',
-      description: 'AI-Powered Enterprise Project Intelligence Platform. Production system with hybrid AI copilot (Heuristic router + LLM fallback), RBAC, real-time Supabase data.',
+      name: 'OrbitPM AI (orbitpm-ai / Xyrenis)',
+      description: 'AI-Powered Enterprise Project Intelligence Platform for BIAL Commercial Department. Production system with hybrid AI copilot (Heuristic router + LLM fallback), RBAC, real-time Supabase data.',
       tech: ['Next.js 16', 'React 19', 'TypeScript', 'Supabase', 'Claude Opus 4.8', 'Gemini 2.5 Flash', 'Tailwind CSS v4'],
-      relevance: 'Production AI platform, hybrid AI architecture, zero-engineering team',
-      keywords: ['GenAI', 'LLM', 'RBAC', 'production', 'AI copilot', 'enterprise'],
+      relevance: 'Production AI platform, hybrid AI architecture, enterprise project governance',
+      keywords: ['GenAI', 'LLM', 'RBAC', 'production', 'AI copilot', 'enterprise', 'project management'],
     },
     {
-      name: 'Jarvis (Xyro)',
-      description: 'Digital-twin agent with durable identity, 9-tier memory system, personality drift prevention, voice (push-to-talk, VAD, barge-in). Built on Claude Agent SDK.',
-      tech: ['Claude Agent SDK', 'TypeScript', 'Whisper.cpp', 'ElevenLabs', 'Swift'],
+      name: 'Majdoor AI (majdoor)',
+      description: 'Autonomous AI workforce orchestration platform managing asynchronous task execution and background agent schedules.',
+      tech: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Agent Workflows'],
+      relevance: 'Autonomous agent orchestration, asynchronous job queues, real-time streaming',
+      keywords: ['AI agent', 'autonomous', 'workflow', 'orchestration', 'queue'],
+    },
+    {
+      name: 'Xyro & Xyro-UI (Jarvis)',
+      description: 'Digital-twin agent with durable identity, 9-tier memory system, personality drift prevention, voice (push-to-talk, VAD, barge-in) on Claude Agent SDK. UI powered by Three.js procedural GLSL energy core.',
+      tech: ['Claude Agent SDK', 'TypeScript', 'Three.js', 'GLSL', 'Whisper.cpp', 'ElevenLabs'],
       relevance: 'AI agent with memory, personality, voice. Cutting-edge agentic AI.',
-      keywords: ['AI agent', 'memory', 'LLM', 'voice', 'personality', 'agentic'],
+      keywords: ['AI agent', 'memory', 'LLM', 'voice', 'personality', 'agentic', '3D', 'WebGL'],
+    },
+    {
+      name: 'A/B Experimentation and Conversion Funnel Evaluation',
+      description: 'Controlled experiment analysing behavioral activity from 20,000 user sessions with SQL CTE pipelines, window functions, and two-proportion hypothesis testing in Python.',
+      tech: ['SQL', 'Python', 'Power BI', 'Statistical Testing'],
+      relevance: 'Rigorous A/B testing, conversion funnels, hypothesis validation, product analytics',
+      keywords: ['A/B Testing', 'experimentation', 'funnel', 'conversion', 'statistics', 'Python', 'SQL'],
+    },
+    {
+      name: 'B2B Sales Intelligence & Customer Behavior Dashboard',
+      description: 'Interactive Tableau analytical interface consolidating 3 operational datasets covering 5,000+ orders, demand trends, and relationship management strategies for 10 high-value clients.',
+      tech: ['Tableau', 'SQL', 'Data Modeling', 'Business Intelligence'],
+      relevance: 'Enterprise BI, sales intelligence, executive reporting, customer retention',
+      keywords: ['BI', 'Tableau', 'sales intelligence', 'retention', 'enterprise'],
     },
     {
       name: 'Innovation Scout',
-      description: 'Market intelligence tool for BIAL. Multi-source research across cities, scoring markets, connecting evidence to airport-applicable moves.',
+      description: 'Market intelligence aggregation platform for BIAL researching global airport innovations across metropolitan hubs with automated relevance ranking.',
       tech: ['Next.js', 'Postgres', 'Vercel', 'Tavily', 'SerpAPI'],
       relevance: 'Analytics product, data platform, business intelligence',
       keywords: ['analytics', 'data platform', 'market intelligence', 'business intelligence'],
     },
     {
-      name: 'xyro-ui',
-      description: 'AI Lifeform Interface with procedural AI energy core using Three.js and custom GLSL shaders.',
-      tech: ['Three.js', 'GLSL', 'WebGL', 'HTML'],
-      relevance: 'Advanced UI/3D, AI visualization',
-      keywords: ['3D', 'WebGL', 'AI visualization'],
+      name: 'BLR Airport WhatsApp Assistant',
+      description: 'Conversational assistant providing real-time flight tracking, gate notifications, and commercial retail offers for Bangalore International Airport.',
+      tech: ['Node.js', 'WhatsApp Business API', 'NLP', 'Airport APIs'],
+      relevance: 'Conversational AI, passenger experience, real-time messaging',
+      keywords: ['conversational AI', 'chatbot', 'NLP', 'customer experience'],
     },
   ];
   
@@ -301,12 +322,16 @@ async function generateSummary(experiences: any[], jobData: any): Promise<string
         model: anthropic('claude-sonnet-4-20250514'),
         system: `You are an executive CV writer tailoring an AI Product Manager's summary for a specific role.
 ABSOLUTE RULE: NEVER fabricate or exaggerate experience, metrics, or technologies.
-Only use the verified experience:
-- 10+ years building AI/ML products
-- BIAL: Built enterprise GenAI platform (EKO) processing 150M+ data points, ₹500Cr+ commercial decisions, 35% faster decisions
-- Bidgely: Scaled SaaS AI platform to 3,000+ enterprise users
-- Amazon: Predictive models, multi-million-dollar retention savings
-- Independent: Built Xyrenis (production AI project intelligence platform with hybrid AI copilot) and Jarvis (digital-twin agent with 9-tier memory)`,
+Only use the verified experience from Neeraj Prakash's resume:
+- 10+ years building data-driven products and AI/ML-powered solutions across airports, fintech, SaaS, and e-commerce.
+- Proven track record of launching 5+ products that delivered 27% revenue growth and 24% improvement in customer retention.
+- BIAL: Conceptualised, built, and deployed EKO (enterprise GenAI platform, internal ChatGPT) automating BI reporting; built Orbit PM internal project tool; designed operational dashboards improving efficiency by 9%; passenger satisfaction +13%; OPEX reduced by 7%; ₹500Cr+ decisions enabled.
+- Bidgely: Scaled SaaS AI platform to 3,000+ enterprise users across utility clients.
+- Micro Technoid India: Boosted product adoption by 33% through targeted A/B testing and user analytics; accelerated delivery velocity by 5%.
+- Amazon: Predictive customer behavior models and automated BI dashboards.
+- Axis Bank: Assistant Manager - Digital Banking Products, analytics-driven customer segmentation.
+- Production GitHub Projects: OrbitPM AI, Majdoor AI, Xyro (Claude Agent SDK digital twin with 9-tier memory), BLR Airport WhatsApp Bot.
+- Education: IIT Ropar (Minor in AI), IIM Visakhapatnam (PGP Product Management), Certified Scrum Master (CSM).`,
         prompt: `Write a punchy 3-4 sentence professional summary tailored specifically for this role:
 Title: ${jobData.title}
 Company: ${jobData.company?.name || 'Target Company'}
@@ -317,17 +342,17 @@ Key requirements: ${(jobData.requiredSkills || []).join(', ')}`,
       console.warn('LLM summary generation failed, using template:', e);
     }
   }
-  return `AI Product Manager with 10+ years building and shipping AI/ML products from concept to production. Built and deployed enterprise GenAI platform (EKO) at Bangalore International Airport processing 150M+ data points, enabling ₹500Cr+ in commercial decisions. Most recently built Xyrenis — a production AI-powered project intelligence platform with hybrid AI copilot (heuristic router + LLM fallback), shipped with zero engineering team. Also built Jarvis — a digital-twin agent with 9-tier memory system and voice capabilities on Claude Agent SDK. Expertise spans GenAI, LLMs, predictive analytics, product strategy, and cross-functional leadership of 15+ person teams.`;
+  return `Results-driven AI Product Manager with 10+ years of experience building data-driven products and AI/ML-powered solutions across airports, fintech, SaaS, and e-commerce. Proven track record of launching 5+ products that delivered 27% revenue growth and 24% improvement in customer retention. Built products from scratch - including EKO (enterprise GenAI analytics platform) and Orbit PM (internal project management tool) - owning the full product lifecycle from ideation to deployment. Deep expertise in GenAI, LLM integration, product roadmap execution, Agile/Scrum, and cross-functional stakeholder management.`;
 }
 
 function reorderExperience(experiences: any[], jobData: any) {
-  return experiences.slice(0, 3).map(exp => ({
+  return experiences.map(exp => ({
     company: exp.company,
     title: exp.jobTitle,
     dates: `${exp.startDate} - ${exp.endDate || 'Present'}`,
     highlights: [
-      ...(exp.responsibilities?.slice(0, 3) || []),
-      ...(exp.achievements?.slice(0, 2).map((a: any) => `${a.title}: ${a.metric}`) || []),
+      ...(exp.responsibilities || []),
+      ...(exp.achievements?.map((a: any) => `${a.title}: ${a.metric}`) || []),
     ],
     isReordered: true,
   }));

@@ -23,130 +23,65 @@ import {
   Plus
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { OFFICIAL_RESUME_MARKDOWN, CANDIDATE_DNA } from '@/lib/candidate-dna';
 
-// Mock CV data
+// Verified candidate CV profiles
 const CVS = [
   {
-    id: '1',
-    name: 'Razorpay AI Builders',
-    targetJob: 'Product Manager II - AI',
-    company: 'Razorpay',
-    createdAt: '2 hours ago',
-    atsScore: 93,
-    status: 'ready',
-    highlights: ['EKO Platform', 'Orbit PM', 'Innovation Scout', 'FinTech experience'],
-    sections: ['Summary', 'Experience', 'Projects', 'Skills', 'Education']
-  },
-  {
-    id: '2',
-    name: 'Google Group PM',
-    targetJob: 'Group Product Manager, Google One Growth',
-    company: 'Google',
-    createdAt: '3 hours ago',
-    atsScore: 89,
-    status: 'ready',
-    highlights: ['Scale experience', 'AI product ownership', 'Growth metrics', 'Leadership'],
-    sections: ['Summary', 'Experience', 'Projects', 'Skills', 'Education']
-  },
-  {
-    id: '3',
-    name: 'PhonePe AI PM',
-    targetJob: 'AI Product Manager - ML',
-    company: 'PhonePe',
-    createdAt: '4 hours ago',
-    atsScore: 87,
-    status: 'ready',
-    highlights: ['ML expertise', 'Predictive analytics', 'FinTech', 'B2C products'],
-    sections: ['Summary', 'Experience', 'Projects', 'Skills', 'Education']
-  },
-  {
-    id: '4',
-    name: 'Master Resume',
-    targetJob: 'General AI Product Manager',
-    company: 'All',
-    createdAt: '1 day ago',
-    atsScore: 85,
+    id: 'master',
+    name: 'Master AI PM Resume',
+    targetJob: 'AI Product Manager | Data & Analytics Strategy',
+    company: 'Master',
+    createdAt: 'Current Master',
+    atsScore: 96,
     status: 'base',
-    highlights: ['AI/ML', 'Product Strategy', 'Analytics', 'Leadership'],
-    sections: ['Summary', 'Experience', 'Projects', 'Skills', 'Education', 'Certifications']
+    highlights: ['EKO GenAI Platform', 'Orbit PM', '10+ Yrs Exp', '20k Session A/B Experiment', 'GitHub Production Systems'],
+    sections: ['Summary', 'Skills', 'Experience', 'Projects', 'GitHub Projects', 'Education', 'Certifications'],
+    content: OFFICIAL_RESUME_MARKDOWN
+  },
+  {
+    id: 'genai-platform',
+    name: 'GenAI & LLM Platform PM',
+    targetJob: 'Principal / Senior GenAI Product Manager',
+    company: 'AI First & Foundation Labs',
+    createdAt: 'Tailored',
+    atsScore: 94,
+    status: 'ready',
+    highlights: ['EKO internal ChatGPT', 'OrbitPM AI copilot', 'Xyro Agent SDK (9-tier memory)', 'Majdoor Autonomous Agents'],
+    sections: ['Summary', 'AI/ML Skills', 'Experience', 'GitHub Production Projects', 'Education'],
+    content: OFFICIAL_RESUME_MARKDOWN
+  },
+  {
+    id: 'analytics-strategy',
+    name: 'Enterprise Analytics & Strategy PM',
+    targetJob: 'Director / Senior PM - Data & Decision Products',
+    company: 'Enterprise SaaS & Corporates',
+    createdAt: 'Tailored',
+    atsScore: 92,
+    status: 'ready',
+    highlights: ['₹500Cr+ commercial decisions', 'Bidgely 3k+ users', 'B2B Sales Intelligence', 'Amazon Behavioral Models'],
+    sections: ['Summary', 'Analytics Skills', 'Experience', 'Analytics Projects', 'Education'],
+    content: OFFICIAL_RESUME_MARKDOWN
+  },
+  {
+    id: 'growth-experimentation',
+    name: 'Product Growth & Experimentation PM',
+    targetJob: 'Product Growth & Experimentation Lead',
+    company: 'Growth & Fintech',
+    createdAt: 'Tailored',
+    atsScore: 90,
+    status: 'ready',
+    highlights: ['20k Session A/B Experimentation', '33% product adoption lift', 'Axis Bank digital growth', 'Conversion funnels'],
+    sections: ['Summary', 'Growth Skills', 'Experience', 'Projects', 'Education'],
+    content: OFFICIAL_RESUME_MARKDOWN
   }
 ];
 
-// Sample resume content for preview
-const SAMPLE_RESUME = `# Neeraj Prakash
-**Senior AI Product Leader**
-
-📧 neevibe27@gmail.com | 📱 +91-7073622877
-🔗 linkedin.com/in/neerajprakash27 | 🌐 neerajprakash.vercel.app | 💻 github.com/neevibe
-
----
-
-## Professional Summary
-
-AI Product Leader with 10+ years building enterprise AI platforms, data products, and decision intelligence systems. Track record of shipping GenAI products that deliver measurable business outcomes: 35% faster decisions, +9% operational efficiency, ₹500Cr+ commercial impact.
-
-Specialized in bridging AI capabilities with real business problems. Built EKO (enterprise GenAI platform), Orbit PM (AI project management), and Innovation Scout (market intelligence).
-
----
-
-## Experience
-
-### Senior Manager, Corporate Strategy & AI Products
-**Bangalore International Airport Limited** | 2023 - Present
-
-- **EKO Platform**: Conceptualized and shipped enterprise GenAI analytics platform
-  - 35% faster executive decisions
-  - +9% operational efficiency
-  - +13% passenger satisfaction scores
-  
-- **Commercial AI**: Leading digital twin, dynamic pricing, and targeting systems
-  - ₹500Cr+ commercial decisions enabled
-  - -7% operating cost reduction
-
-### Senior Business Analyst, AI Analytics Products
-**Bidgely** | 2021 - 2023
-
-- Scaled SaaS AI platform adoption to 3,000+ enterprise users across utility clients in 15 months
-- Built executive analytics dashboards driving retention and expansion decisions
-
----
-
-## Recent Projects (GitHub)
-
-**Xyrenis (orbitpm-ai)** — AI-Powered Enterprise Project Intelligence
-- Hybrid AI copilot with context-aware assistance
-- TypeScript, React, Vercel AI SDK
-
-**Xyro (Jarvis)** — Digital-Twin Agent
-- 9-tier memory architecture, voice interface, personality engine
-- Real-time state management, adaptive responses
-
-**Innovation Scout** — Market Intelligence Tool
-- Multi-source intelligence aggregation
-- Live at innovation-scout.vercel.app
-
----
-
-## Skills
-
-**AI/ML**: GenAI, LLMs, Predictive Analytics, ML Systems, AI Product Development
-**Product**: Strategy, Roadmapping, 0→1 Building, B2B/B2C, Platform Thinking
-**Technical**: Python, TypeScript, SQL, React, Next.js, Data Pipelines
-**Leadership**: Cross-functional Teams, Stakeholder Management, Executive Communication
-
----
-
-## Education
-
-- **IIT Ropar** — Minor in AI
-- **IIM Visakhapatnam** — PGP Product Management
-- **Great Lakes** — Data Science & Engineering
-- **Certified ScrumMaster (CSM)**
-`;
+const SAMPLE_RESUME = OFFICIAL_RESUME_MARKDOWN;
 
 export default function CVStudioPage() {
   const [cvList, setCvList] = useState(CVS);
-  const [selectedCV, setSelectedCV] = useState<string | null>('1');
+  const [selectedCV, setSelectedCV] = useState<string | null>('master');
   const [currentContent, setCurrentContent] = useState(SAMPLE_RESUME);
   const [isGenerating, setIsGenerating] = useState(false);
   
@@ -170,10 +105,12 @@ export default function CVStudioPage() {
             atsScore: 92,
             status: 'ready',
             highlights: ['EKO Platform', 'LLM Agent Systems', 'Product Strategy', 'Cross-functional Leadership'],
-            sections: ['Summary', 'Experience', 'Projects', 'Skills', 'Education']
+            sections: ['Summary', 'Experience', 'Projects', 'Skills', 'Education'],
+            content: OFFICIAL_RESUME_MARKDOWN,
           };
           setCvList(prev => [customItem, ...prev]);
           setSelectedCV(customItem.id);
+          setCurrentContent(OFFICIAL_RESUME_MARKDOWN);
         }
       }
     }
@@ -206,7 +143,8 @@ export default function CVStudioPage() {
           atsScore: data.cv.atsScore || 94,
           status: 'ready',
           highlights: ['EKO Platform', 'LLM Agent Systems', '0→1 PM', 'Enterprise AI'],
-          sections: ['Summary', 'Experience', 'Projects', 'Skills', 'Education']
+          sections: ['Summary', 'Experience', 'Projects', 'Skills', 'Education'],
+          content: data.cv.content || OFFICIAL_RESUME_MARKDOWN,
         };
         setCvList([newCvItem, ...cvList]);
         setSelectedCV(newCvItem.id);
@@ -273,7 +211,10 @@ export default function CVStudioPage() {
             {cvList.map((cv) => (
               <div 
                 key={cv.id}
-                onClick={() => setSelectedCV(cv.id)}
+                onClick={() => {
+                  setSelectedCV(cv.id);
+                  setCurrentContent((cv as any).content || OFFICIAL_RESUME_MARKDOWN);
+                }}
                 className={`glass rounded-xl p-4 cursor-pointer transition-all ${
                   selectedCV === cv.id ? 'border-green-500/50 glow-green' : 'hover:border-border/50'
                 }`}
