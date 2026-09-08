@@ -98,20 +98,21 @@ export function scoreJob(jobData: JobData): JobScore {
 
 function calculateAIScore(job: JobData, candidate: CandidateProfile): number {
   let score = 0;
-  const aiSkills = candidate.skills.filter(s => s.category === 'ai');
   
-  // Check AI requirements match
-  const aiKeywords = ['genai', 'llm', 'ai', 'ml', 'machine learning', 'rag', 'prompt'];
-  const jobText = `${job.title} ${job.description}`.toLowerCase();
+  // Check AI requirements match across title, description, and skill tags
+  const aiKeywords = ['genai', 'generative', 'llm', 'ai', 'ml', 'machine learning', 'rag', 'prompt', 'agent', 'agentic', 'nlp', 'deep learning', 'vision'];
+  const allSkills = [...(job.requiredSkills || []), ...(job.preferredSkills || [])].join(' ');
+  const jobText = `${job.title} ${job.description} ${allSkills}`.toLowerCase();
   
   if (aiKeywords.some(k => jobText.includes(k))) {
     score += 50;
     
-    // Bonus for specific matches
+    // Bonus for specific deep AI matches
     if (jobText.includes('genai') || jobText.includes('generative')) score += 15;
-    if (jobText.includes('llm')) score += 15;
-    if (jobText.includes('rag')) score += 10;
+    if (jobText.includes('llm') || jobText.includes('language model')) score += 15;
+    if (jobText.includes('rag') || jobText.includes('vector')) score += 10;
     if (jobText.includes('prompt')) score += 10;
+    if (jobText.includes('agent') || jobText.includes('agentic')) score += 10;
   }
   
   return Math.min(100, score);
@@ -120,15 +121,16 @@ function calculateAIScore(job: JobData, candidate: CandidateProfile): number {
 function calculateProductScore(job: JobData, candidate: CandidateProfile): number {
   let score = 0;
   
-  // Check product experience
-  const productKeywords = ['product manager', 'product owner', 'product strategy', '0-1', 'zero to one'];
-  const jobText = `${job.title} ${job.description}`.toLowerCase();
+  // Check product experience across title, description, and skill tags
+  const productKeywords = ['product manager', 'product owner', 'product strategy', 'product lead', 'pm', '0-1', '0→1', 'zero to one'];
+  const allSkills = [...(job.requiredSkills || []), ...(job.preferredSkills || [])].join(' ');
+  const jobText = `${job.title} ${job.description} ${allSkills}`.toLowerCase();
   
   if (productKeywords.some(k => jobText.includes(k))) {
     score += 60;
     
     // Bonus for 0→1 experience
-    if (jobText.includes('0-1') || jobText.includes('zero to one') || jobText.includes('greenfield')) {
+    if (jobText.includes('0-1') || jobText.includes('0→1') || jobText.includes('zero to one') || jobText.includes('greenfield')) {
       score += 20;
     }
     

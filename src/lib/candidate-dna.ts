@@ -16,6 +16,7 @@ export interface CandidateProfile {
   linkedinUrl: string;
   portfolioUrl: string;
   githubUrl: string;
+  yearsOfExperience: number;
   summary: string;
   noticePeriod: string;
   preferredLocations: string[];
@@ -108,6 +109,7 @@ export const CANDIDATE_DNA: CandidateProfile = {
   linkedinUrl: 'https://linkedin.com/in/neerajprakash27',
   portfolioUrl: 'https://neerajprakash.vercel.app',
   githubUrl: 'https://github.com/neevibe',
+  yearsOfExperience: 10,
   summary: `Results-driven AI Product Manager with 10+ years of experience building data-driven products and AI/ML-powered solutions across airports, fintech, SaaS, and e-commerce. Proven track record of launching 5+ products that delivered 27% revenue growth and 24% improvement in customer retention. Has built products from scratch - including EKO (enterprise GenAI analytics platform) and Orbit PM (internal project management tool) - owning the full product lifecycle from ideation to deployment. Deep expertise in GenAI, LLM integration, product roadmap execution, Agile/Scrum, and cross-functional stakeholder management. Adept at translating complex AI capabilities into business outcomes, with hands-on experience deploying enterprise AI platforms and predictive analytics at scale.`,
   noticePeriod: 'Immediate to 30 days',
   preferredLocations: ['Bengaluru', 'Bangalore', 'Remote', 'Hybrid'],
@@ -480,6 +482,19 @@ export const CANDIDATE_DNA: CandidateProfile = {
       ],
       category: 'production_ai',
     },
+    {
+      id: 9,
+      name: 'Job Hunt Agent (job-hunt-agent)',
+      technologies: ['Next.js 16', 'TypeScript', 'PostgreSQL', 'Drizzle ORM', 'Claude Sonnet 4', 'Tailwind CSS'],
+      duration: '2026',
+      githubUrl: 'https://github.com/neevibe/job-hunt-agent',
+      demoUrl: 'https://job-hunt-agent-mauve.vercel.app',
+      description: [
+        'Autonomous AI Product Manager Job Hunt Agent orchestrating multi-platform discovery, fit scoring, and ATS submissions.',
+        'Direct ATS integrations with Greenhouse and Lever public endpoints, with automated CV tailoring and verified STAR screening answers.',
+      ],
+      category: 'agentic',
+    },
   ],
   education: [
     {
@@ -646,6 +661,10 @@ Results-driven AI Product Manager with 10+ years of experience building data-dri
 ### **BLR Airport WhatsApp Assistant** | [GitHub](https://github.com/neevibe/BLRairport_whatsapp_bot)
 *Real-time Passenger Conversational Assistant*
 - Conversational bot providing automated flight tracking, gate changes, and commercial offers for BIAL passengers.
+
+### **Job Hunt Agent (\`job-hunt-agent\`)** | [GitHub](https://github.com/neevibe/job-hunt-agent) | [Live Demo](https://job-hunt-agent-mauve.vercel.app)
+*Autonomous AI Product Manager Job Hunt Agent*
+- Multi-agent autonomous system for job discovery, ATS fit scoring, and automated direct ATS submissions.
 
 ---
 
