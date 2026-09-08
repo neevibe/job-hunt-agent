@@ -510,12 +510,14 @@ export default function JobsPage() {
                   
                   {/* Actions */}
                   <div className="flex gap-2">
-                    <button 
-                      onClick={() => handleViewDetails(job)}
+                    <a 
+                      href={job.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors"
                     >
                       View Details
-                    </button>
+                    </a>
                     <button 
                       onClick={() => handleTailorCV(job)}
                       className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors flex items-center gap-1.5"
@@ -523,12 +525,14 @@ export default function JobsPage() {
                       <FileText className="w-3.5 h-3.5" />
                       Tailor CV
                     </button>
-                    <button 
-                      onClick={() => handleApply(job)}
+                    <a 
+                      href={job.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition-colors"
                     >
                       Apply
-                    </button>
+                    </a>
                     <button className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors ml-auto">
                       <Star className="w-4 h-4" />
                     </button>

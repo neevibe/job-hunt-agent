@@ -286,24 +286,28 @@ export default function Dashboard() {
                   </div>
 
                   <div className="flex gap-2">
-                    <button 
-                      onClick={() => handleViewJD(job)}
+                    <a 
+                      href={job.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="flex-1 px-3 py-1.5 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors flex items-center justify-center gap-1"
                     >
                       View JD <ExternalLink className="w-3 h-3" />
-                    </button>
+                    </a>
                     <button 
                       onClick={() => handleTailorCV(job)}
                       className="flex-1 px-3 py-1.5 bg-secondary hover:bg-secondary/80 rounded-lg text-sm transition-colors"
                     >
                       Tailor CV
                     </button>
-                    <button 
-                      onClick={() => handleApply(job)}
+                    <a 
+                      href={job.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="flex-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-1"
                     >
                       Apply <ExternalLink className="w-3 h-3" />
-                    </button>
+                    </a>
                   </div>
                 </motion.div>
               ))}
@@ -345,12 +349,14 @@ export default function Dashboard() {
               <p className="text-sm mb-3">
                 Apply to <strong>Razorpay AI Builders</strong> — 92% match, highest fit found today.
               </p>
-              <button 
-                onClick={() => window.open('https://razorpay.typeform.com/to/Aj64eENJ', '_blank')}
+              <a 
+                href="https://razorpay.typeform.com/to/Aj64eENJ"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
               >
                 Apply Now <ExternalLink className="w-4 h-4" />
-              </button>
+              </a>
             </div>
 
             {/* Funnel */}
