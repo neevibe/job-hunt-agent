@@ -1,53 +1,5 @@
 [
   {
-    "url": "https://job-boards.greenhouse.io/anthropic/jobs/5397737008",
-    "company": "Anthropic",
-    "title": "Product Manager, Business Technology",
-    "location": "Remote-Friendly (Travel-Required) / San Francisco, CA / Seattle, WA / New York City, NY",
-    "posted": "2026-08-21",
-    "ats": "greenhouse"
-  },
-  {
-    "url": "https://job-boards.greenhouse.io/anthropic/jobs/5393452008",
-    "company": "Anthropic",
-    "title": "Product Manager, Public Sector",
-    "location": "Remote-Friendly (Travel-Required) / Washington, DC",
-    "posted": "2026-08-19",
-    "ats": "greenhouse"
-  },
-  {
-    "url": "https://jobs.ashbyhq.com/n8n/bcf96878-d41a-479d-b506-7753356077c4",
-    "company": "n8n",
-    "title": "Senior Product Manager (Enterprise)",
-    "location": "Berlin Office · Bosnia · Romania · Norway · Estonia · Latvia · Slovenia · Italy · Netherlands · Hungary · Portugal · France · Poland · Serbia · Germany · Austria · Finland · Albania · Lithuania · Slovakia · Ireland · Bulgaria · Denmark · Belgium · Czech Republic · United Kingdom · Croatia · Spain · Greece · Remote",
-    "posted": "2026-08-31",
-    "ats": "ashby"
-  },
-  {
-    "url": "https://jobs.ashbyhq.com/n8n/d418f8fb-b2f2-405e-8f22-db73dcf4e8b4",
-    "company": "n8n",
-    "title": "Senior Product Manager - Core Platform (Engine, Scale & Reliability)",
-    "location": "Berlin Office · Bosnia · Romania · Norway · Estonia · Latvia · Slovenia · Netherlands · Hungary · Portugal · Poland · Serbia · Germany · Austria · Finland · Albania · Lithuania · Slovakia · Ireland · Bulgaria · Denmark · Belgium · Czech Republic · United Kingdom · Croatia · Spain · Greece · Remote",
-    "posted": "2026-08-03",
-    "ats": "ashby"
-  },
-  {
-    "url": "https://jobs.ashbyhq.com/n8n/98d8bc2f-ee58-4732-8977-61a761aac8b0",
-    "company": "n8n",
-    "title": "Senior Product Manager - Core Experience",
-    "location": "Berlin Office · Bosnia · Romania · Norway · Estonia · Latvia · Slovenia · Netherlands · Hungary · Portugal · Poland · Serbia · Germany · Austria · Finland · Albania · Lithuania · Slovakia · Ireland · Bulgaria · Denmark · Belgium · Czech Republic · United Kingdom · Croatia · Spain · Greece · Remote",
-    "posted": "2026-09-01",
-    "ats": "ashby"
-  },
-  {
-    "url": "https://job-boards.greenhouse.io/vercel/jobs/6147956004",
-    "company": "Vercel",
-    "title": "Product Manager, Observability",
-    "location": "Hybrid - New York City",
-    "posted": "2026-08-20",
-    "ats": "greenhouse"
-  },
-  {
     "url": "https://job-boards.greenhouse.io/gleanwork/jobs/4726336005",
     "company": "Glean",
     "title": "Product Manager",
@@ -77,22 +29,6 @@
     "title": "Associate Principal Product Manager - Networks",
     "location": "Bangalore, India",
     "posted": "2026-06-30",
-    "ats": "greenhouse"
-  },
-  {
-    "url": "https://jobs.ashbyhq.com/synthesia/85e7b0df-f603-416b-a7bd-3331b6576186",
-    "company": "Synthesia",
-    "title": "Product Manager, Growth (Senior/Staff-level)",
-    "location": "Europe · London · United Kingdom · Remote",
-    "posted": "2026-08-17",
-    "ats": "ashby"
-  },
-  {
-    "url": "https://job-boards.eu.greenhouse.io/amplemarket/jobs/4066993101",
-    "company": "Amplemarket",
-    "title": "Senior Product Manager",
-    "location": "Remote, EMEA",
-    "posted": "2022-08-26",
     "ats": "greenhouse"
   },
   {
@@ -144,19 +80,662 @@
     "ats": "greenhouse"
   },
   {
-    "url": "https://job-boards.greenhouse.io/hightouch/jobs/6185678004",
-    "company": "Hightouch",
-    "title": "Product Manager, Marketing Orchestration",
-    "location": "Remote (North America)",
-    "posted": "2026-09-08",
+    "url": "https://jobs.ashbyhq.com/hellobrightline/730543fa-e444-4a56-bdb5-9dc8620fb4f7",
+    "company": "hellobrightline",
+    "title": "Principal Product Manager, Public Sector",
+    "location": "Remote (National)",
+    "posted": "2026-09-17",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/hilberts/b0572b6d-320b-4a71-ac6a-39fbb2e351df",
+    "company": "hilberts",
+    "title": "Product Manager - LATAM",
+    "location": "LATAM · Remote",
+    "posted": "2026-09-17",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/ascertain/12b819b4-7837-4ba9-9b94-db23d31b48df",
+    "company": "ascertain",
+    "title": "Senior Product Manager",
+    "location": "Remote",
+    "posted": "2026-09-16",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/demandbase/97e337ab-a0bd-4ea9-8d83-80f63acfbe7d",
+    "company": "demandbase",
+    "title": "Senior Product Manager, AI Adoption & Growth",
+    "location": "US - Remote",
+    "posted": "2026-09-16",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/blockworks/9141b1dd-abd5-45ad-9778-41cb5395d08e",
+    "company": "blockworks",
+    "title": "Senior Product Manager",
+    "location": "Remote · Remote - Global · New York · United States · Remote - US",
+    "posted": "2026-09-15",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/addi/b8ee072b-66e3-43d2-851e-6ed6179928ee",
+    "company": "addi",
+    "title": "Staff Product Manager - Conversational AI",
+    "location": "LatAm · Remote",
+    "posted": "2026-09-15",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://job-boards.greenhouse.io/betterhelpcom/jobs/5423321008",
+    "company": "betterhelpcom",
+    "title": "Principal Product Manager",
+    "location": "US - Remote",
+    "posted": "2026-09-14",
     "ats": "greenhouse"
   },
   {
-    "url": "https://job-boards.greenhouse.io/hightouch/jobs/6185521004",
-    "company": "Hightouch",
-    "title": "Product Manager, Real Time",
-    "location": "Remote (North America)",
-    "posted": "2026-09-08",
+    "url": "https://jobs.ashbyhq.com/astra/97873bc7-e9c3-4539-98ca-85d3f1033d6d",
+    "company": "astra",
+    "title": "Product Manager, Platform",
+    "location": "Remote - US Only",
+    "posted": "2026-09-11",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/kodex/462f4052-f247-4b14-86fc-550123571b05",
+    "company": "kodex",
+    "title": "Senior Product Manager, Platform & Integrations",
+    "location": "US-Remote",
+    "posted": "2026-09-10",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/butterflymx/fbef2dbc-122b-4ae7-b3cc-93f4d427394f",
+    "company": "butterflymx",
+    "title": "Principal Product Manager, Mobile",
+    "location": "US Remote",
+    "posted": "2026-09-10",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://job-boards.greenhouse.io/alpaca/jobs/6187211004",
+    "company": "alpaca",
+    "title": "Product Manager - Brokerage - Middle East",
+    "location": "Remote - Global Anywhere",
+    "posted": "2026-09-10",
     "ats": "greenhouse"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/jobber/2b8ae7cc-d8df-4d4f-889c-a1cd9c533c9d",
+    "company": "jobber",
+    "title": "Staff Product Manager, Fintech New Bets",
+    "location": "Remote",
+    "posted": "2026-09-09",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://job-boards.greenhouse.io/calendly/jobs/8788325002",
+    "company": "calendly",
+    "title": "Staff Product Manager, Intelligent Customer Experience",
+    "location": "Remote - US",
+    "posted": "2026-09-09",
+    "ats": "greenhouse"
+  },
+  {
+    "url": "https://job-boards.greenhouse.io/alphasense/jobs/8789302002",
+    "company": "alphasense",
+    "title": "Product Manager 1",
+    "location": "Remote - India",
+    "posted": "2026-09-09",
+    "ats": "greenhouse"
+  },
+  {
+    "url": "https://job-boards.greenhouse.io/atariinc/jobs/5419286008",
+    "company": "atariinc",
+    "title": "Business Operations Product Manager",
+    "location": "Atari - US (Remote)",
+    "posted": "2026-09-09",
+    "ats": "greenhouse"
+  },
+  {
+    "url": "https://job-boards.greenhouse.io/appian/jobs/8188131",
+    "company": "appian",
+    "title": "Senior Product Manager II - Identity & Access Management",
+    "location": "Chennai, India",
+    "posted": "2026-09-09",
+    "ats": "greenhouse"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/joko/ad0f0110-4081-4242-9a18-cfcc91a98bde",
+    "company": "joko",
+    "title": "Lead Product Manager - AI Platform",
+    "location": "Paris · Barcelona · Spain · Remote",
+    "posted": "2026-09-08",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/joko/e81c720e-01b5-45e8-af4e-89f5d83baf7b",
+    "company": "joko",
+    "title": "Lead Product Manager - Business Lines",
+    "location": "Paris · Barcelona · Spain · Remote",
+    "posted": "2026-09-08",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://job-boards.greenhouse.io/arcesiumllc/jobs/5231950007",
+    "company": "arcesiumllc",
+    "title": "Product Manager - Tax",
+    "location": "Bengaluru; Gurugram; Hyderabad",
+    "posted": "2026-09-07",
+    "ats": "greenhouse"
+  },
+  {
+    "url": "https://job-boards.greenhouse.io/alphasenseindia/jobs/8755400002",
+    "company": "alphasenseindia",
+    "title": "Product Manager 1",
+    "location": "Remote - India",
+    "posted": "2026-09-07",
+    "ats": "greenhouse"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/hirehangar/216d4f1e-abf4-4cc7-968f-9b2404291adb",
+    "company": "hirehangar",
+    "title": "E-commerce Product Manager",
+    "location": "Mexico - Mexico City · Parugauy - Asuncion · Asuncion · Paraguay · Ecuador - Guayaquil · Guayaquil · Ecuador · Chile - Santiago · Santiago · Chile · Mexico - Monterrey · Monterrey · Mexico · Egypt - Cairo · Cairo · Egypt · South Africa - Johannesburg · Johannesburg · South Africa · Columbia - Bogotá · Bogotá · Colombia · Columbia - Medellín · Medellín · Uruguay - Montevideo · Montevideo · Uruguay · Peru - Lima · Lima · Peru · Nicaragua - Managua · Managua · Nicaragua · Jamaica - Kingston · Kingston · Jamaica · Argentina - Buenos Aires · Buenos Aires · Argentina · Panama - Panama City · Panama City · Panama · Honduras - Tegucigalpa · Tegucigalpa · Honduras · South Africa - Cape Town · Cape Town · Remote",
+    "posted": "2026-09-05",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/hims-and-hers/1d87da56-8a32-454b-a1ce-8c9656325573",
+    "company": "hims-and-hers",
+    "title": "Product Manager, AI",
+    "location": "US Remote",
+    "posted": "2026-09-04",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/clarium/8d948a17-798a-43c4-b45a-ba93eea3e742",
+    "company": "clarium",
+    "title": "Staff Product Manager",
+    "location": "Remote/US",
+    "posted": "2026-09-04",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://job-boards.greenhouse.io/arcesiumllc/jobs/5228329007",
+    "company": "arcesiumllc",
+    "title": "Technical Product Manager",
+    "location": "Bengaluru; Gurugram; Hyderabad",
+    "posted": "2026-09-02",
+    "ats": "greenhouse"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/belvo/94f3c1a6-e826-4151-a815-ea0269143731",
+    "company": "belvo",
+    "title": "Senior Product Manager",
+    "location": "🇲🇽 Mexico City / 🌎 Remote",
+    "posted": "2026-09-02",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/kissmyapps/474f1b99-cbaa-42f5-bf72-efbb046acfe9",
+    "company": "kissmyapps",
+    "title": "Product Manager (web)",
+    "location": "Ukraine · Remote",
+    "posted": "2026-09-01",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/kit/2b4158e2-47c0-4570-863a-c23b5b8cad09",
+    "company": "kit",
+    "title": "Senior Product Manager - Email & Publishing Tools",
+    "location": "Remote",
+    "posted": "2026-09-01",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/kit/c3a68331-f3ef-4fd5-8151-ae269179cdc7",
+    "company": "kit",
+    "title": "Senior Product Manager - Content Creation",
+    "location": "Remote",
+    "posted": "2026-09-01",
+    "ats": "ashby"
+  },
+  {
+    "url": "https://jobs.ashbyhq.com/givebutter/605dcc05-480b-406d-b0b6-e780537642ac",
+    "company": "givebutter",
+    "title": "Senior Product Manager, CRM & Engage",
+    "location": "Remote · New York, NY · New York · United States · Indianapolis, IN · Indianapolis · Salt Lake City, UT · Salt Lake City · Nashville, TN · Nashville · San Francisco, CA · San Francisco · Seattle, WA · Seattle · Minneapolis, MN · Minneapolis · Los Angeles, CA · Los Angeles · Austin, TX · Austin · Denver, CO · Denver",
+    "posted": "2026-08-31",
+    "ats": "ashby"
+  },
+  {
+    "company": "Meesho",
+    "title": "Product Manager I - AI",
+    "url": "https://jobs.lever.co/meesho/95a27bd6-2803-47f0-b159-47398f607a59",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Brillio",
+    "title": "Analytics Manager (CX analytics)",
+    "url": "https://jobs.lever.co/brillio-2/151e32ab-47e5-48ab-b473-075011598498",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Yassir",
+    "title": "AI Product Manager",
+    "url": "https://jobs.lever.co/Yassir/3ac148b1-6b81-4020-9914-68ff5ebd6c2e",
+    "ats": "lever",
+    "location": "Remote India"
+  },
+  {
+    "company": "Paytm",
+    "title": "AI Product Manager - Decision Engine",
+    "url": "https://jobs.lever.co/paytm/1cd01955-1add-489f-a9c7-209042903c97",
+    "ats": "lever",
+    "location": "Noida, India"
+  },
+  {
+    "company": "Hevo Data",
+    "title": "Analytics Manager",
+    "url": "https://jobs.lever.co/hevodata/d8ea771e-fe9b-4c14-b184-4bed18296928",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Paytm",
+    "title": "Senior Product Manager - UPI Product",
+    "url": "https://jobs.lever.co/paytm/fec8e98b-d09b-4edb-b5a9-fe04aa079a3c",
+    "ats": "lever",
+    "location": "Noida, India"
+  },
+  {
+    "company": "Meesho",
+    "title": "Analytics Manager",
+    "url": "https://jobs.lever.co/meesho/73ac38ff-d3ab-4dab-a40e-798af7b6fa1f",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Meesho",
+    "title": "Senior Analytics Manager",
+    "url": "https://jobs.lever.co/meesho/bb9d0a12-504f-47f3-8c17-460c02c6cc28",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Insider One",
+    "title": "AI Product Manager - B2B SaaS",
+    "url": "https://jobs.lever.co/insiderone/fdfa3283-fee9-4a1e-aa01-769c42ae1ac3",
+    "ats": "lever",
+    "location": "Remote"
+  },
+  {
+    "company": "nexos.ai",
+    "title": "Product Manager | Mid-Senior",
+    "url": "https://jobs.lever.co/Nexos/4045032d-b02b-4b87-9c4d-1617816acec9",
+    "ats": "lever",
+    "location": "Remote"
+  },
+  {
+    "company": "GitLab",
+    "title": "Senior Program Manager, Enterprise Technology & AI",
+    "url": "https://job-boards.greenhouse.io/gitlab/jobs/8584282002",
+    "ats": "greenhouse",
+    "location": "Remote, Bangalore"
+  },
+  {
+    "company": "Resolve to Save Lives",
+    "title": "Senior Strategist, Data & AI",
+    "url": "https://job-boards.greenhouse.io/resolvetosavelives/jobs/5415932008",
+    "ats": "greenhouse",
+    "location": "Remote - India"
+  },
+  {
+    "company": "Pure Storage",
+    "title": "Enterprise AI & Integrations Engineer",
+    "url": "https://job-boards.greenhouse.io/purestorage/jobs/8037952",
+    "ats": "greenhouse",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Talkdesk",
+    "title": "Senior Software Engineer I - Mobile Developer",
+    "url": "https://job-boards.greenhouse.io/talkdesk2/jobs/8155890",
+    "ats": "greenhouse",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Libra AI",
+    "title": "Associate Product Manager (AI)",
+    "url": "https://jobs.ashbyhq.com/libra/f267e673-e06d-4025-bf65-9bb84881ffda",
+    "ats": "ashby",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Libra AI",
+    "title": "AI PM",
+    "url": "https://jobs.ashbyhq.com/libra/2c3bbd9d-7d53-41cb-a5f3-a284ad2f2b80",
+    "ats": "ashby",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Ema",
+    "title": "Product Manager",
+    "url": "https://jobs.ashbyhq.com/ema",
+    "ats": "ashby",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Sarvam",
+    "title": "Product Manager On-Device & Edge AI",
+    "url": "https://jobs.ashbyhq.com/sarvam/f462051e-ec76-45cf-96c5-e0192dd4dcc6",
+    "ats": "ashby",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Gushwork",
+    "title": "Product Manager",
+    "url": "https://jobs.lever.co/gushwork/c03a9615-f124-424c-8bbd-90d209a68f3d",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Meesho",
+    "title": "Product Manager (Data Platforms)",
+    "url": "https://jobs.lever.co/meesho/3279b339-aad6-4522-80d4-2587693651cb",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Meesho",
+    "title": "Product Manager I (Data Platforms)",
+    "url": "https://jobs.lever.co/meesho/2f1dba8f-bc99-4490-8200-d2cd7f92f544",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Hevo Data",
+    "title": "Product Manager",
+    "url": "https://jobs.lever.co/hevodata/c665b22f-6336-4ec2-88d8-4165f51d5396",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Dozee",
+    "title": "Product Manager",
+    "url": "https://jobs.lever.co/dozee/679bdaeb-443e-45ac-b73e-00bdacf2f872",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Wing",
+    "title": "Product Manager, AI Solutions",
+    "url": "https://jobs.lever.co/getwingapp/3101e44c-aab7-4026-b0f7-2da60589304a",
+    "ats": "lever",
+    "location": "Bangalore, India (Remote)"
+  },
+  {
+    "company": "Paytm",
+    "title": "Product Manager - Travel",
+    "url": "https://jobs.lever.co/paytm/d838e0a2-623e-4d96-94e8-dcc70a5f879d",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Zeta",
+    "title": "Product Manager II",
+    "url": "https://jobs.lever.co/zeta/0634dbe9-0cbc-4cee-a8a7-c6185dbae42e",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Meesho",
+    "title": "Product Manager I",
+    "url": "https://jobs.lever.co/meesho/3b6ea0f7-cde7-4034-a862-232a177a4c95",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Jobgether",
+    "title": "Core Experience & AI PM",
+    "url": "https://jobs.lever.co/jobgether/606e590e-f5e9-4688-82f4-fc7f74768766",
+    "ats": "lever",
+    "location": "India (Remote)"
+  },
+  {
+    "company": "Clari",
+    "title": "Principal PM - Foundations",
+    "url": "https://jobs.lever.co/clari/c9d34354-bb47-417f-b437-dc2e7fd555cb",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Weekday",
+    "title": "Product Manager Associate",
+    "url": "https://jobs.lever.co/weekdayworks/3f3645f5-520f-4ff3-93d0-6fd8f9bf6180",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Warner Music",
+    "title": "Product Manager",
+    "url": "https://jobs.lever.co/wmg/2badd508-5d7d-4733-b357-f2eecf7cd1b6",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Wing",
+    "title": "Lead Product Manager, AI Solutions",
+    "url": "https://jobs.lever.co/getwingapp/2a835536-da28-4f2b-a143-13d0ac9bf133",
+    "ats": "lever",
+    "location": "Bangalore, India (Remote)"
+  },
+  {
+    "company": "100ms",
+    "title": "Product Manager - AI Agents (Healthcare)",
+    "url": "https://jobs.lever.co/100ms/03b1718b-a597-46f5-8178-d555f259b6bd",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Wing",
+    "title": "Senior Product Manager, AI Solutions",
+    "url": "https://jobs.lever.co/getwingapp/ef79688d-0328-406d-8763-4aa31d81b5b4",
+    "ats": "lever",
+    "location": "Bangalore, India (Remote)"
+  },
+  {
+    "company": "Clari",
+    "title": "Sr. Product Manager II - Core",
+    "url": "https://jobs.lever.co/clari/e324dd50-160b-4d80-81d2-f55e69aa0089",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Fam",
+    "title": "Senior Product Manager",
+    "url": "https://jobs.lever.co/fampay/bc1060ed-d15a-4f62-a560-856cc344201e",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Fam",
+    "title": "Principal Product Manager",
+    "url": "https://jobs.lever.co/fampay/fe282b22-d821-4f8b-94ac-12363ec802b2",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "ASAPP",
+    "title": "Senior PM, Observability Tools",
+    "url": "https://jobs.lever.co/asapp-2/e0b52b76-9eb8-4adf-85a7-f708fc235c99",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Jobgether",
+    "title": "Principal Product Manager",
+    "url": "https://jobs.lever.co/jobgether/7e4cd8c4-3475-4f82-8be4-b76537b79214",
+    "ats": "lever",
+    "location": "India (Remote)"
+  },
+  {
+    "company": "Jobgether",
+    "title": "Principal PM - Knowledge Bases & Ask AI",
+    "url": "https://jobs.lever.co/jobgether/8289c2c8-d42c-480a-b320-2f1f4d90f433",
+    "ats": "lever",
+    "location": "India"
+  },
+  {
+    "company": "Neuron7",
+    "title": "Lead PM – Agentic Experiences",
+    "url": "https://jobs.lever.co/neuron7/e9d47d0d-6f19-4a59-8bf9-561d721b9efe",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Jobgether",
+    "title": "PM - AI Neobank App",
+    "url": "https://jobs.lever.co/jobgether/ba88d22b-5dff-4fe8-aef9-a457c96a5ffc",
+    "ats": "lever",
+    "location": "India (Remote)"
+  },
+  {
+    "company": "Meesho",
+    "title": "Senior Product Manager",
+    "url": "https://jobs.lever.co/meesho/128cee5f-5e62-43f4-8339-6ead8b5498e7",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Paytm",
+    "title": "Sr PM - Agent & Merchant",
+    "url": "https://jobs.lever.co/paytm/b909105c-269c-4726-b0af-f07ff2b2dd36",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Paytm",
+    "title": "Sr PM (Data Product) - PPSL",
+    "url": "https://jobs.lever.co/paytm/26a6a342-55db-4262-8e75-648bd8338fd0",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "ASAPP",
+    "title": "Sr PM, Data & Solution Strategy",
+    "url": "https://jobs.lever.co/asapp-2/e7cbc8b4-f11b-4c9b-91ac-516c3938efab",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Paytm",
+    "title": "Sr PM - Ads",
+    "url": "https://jobs.lever.co/paytm/6cee2f1c-6cae-4e46-9533-d62283f56734",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Acceldata",
+    "title": "Principal Product Manager",
+    "url": "https://jobs.lever.co/acceldata/5c8bd1f9-d5d1-4b91-817f-3ce9fc15f0e2",
+    "ats": "lever",
+    "location": "India"
+  },
+  {
+    "company": "Mindtickle",
+    "title": "Sr PM - Seller Mastery",
+    "url": "https://jobs.lever.co/mindtickle/e55245fd-983c-4564-9b3f-491b7d16b8e8",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Saviynt",
+    "title": "Sr PM - Integrations",
+    "url": "https://jobs.lever.co/saviynt/474ae105-d456-4261-9161-4cfa777b1ff7",
+    "ats": "lever",
+    "location": "India"
+  },
+  {
+    "company": "ASAPP",
+    "title": "Sr PM, Messaging Platform & AI Services",
+    "url": "https://jobs.lever.co/asapp-2/684f09b1-dc71-4435-8ae0-53dfa2604674",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Saviynt",
+    "title": "Staff Product Manager",
+    "url": "https://jobs.lever.co/saviynt/a431e2af-efd0-4912-b64e-446ec9dae821",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Jobgether",
+    "title": "Principal PM (CLM)",
+    "url": "https://jobs.lever.co/jobgether/012d209a-52ee-4e51-8c12-b3aab11b5ca8",
+    "ats": "lever",
+    "location": "India (Remote)"
+  },
+  {
+    "company": "Jobgether",
+    "title": "Principal PM (Infra)",
+    "url": "https://jobs.lever.co/jobgether/c2ae29b8-f298-4756-938d-a0f166c6e0aa",
+    "ats": "lever",
+    "location": "India (Remote)"
+  },
+  {
+    "company": "Sitetracker",
+    "title": "Senior Product Manager",
+    "url": "https://jobs.lever.co/sitetracker/f5aa2879-f79d-4ad1-ae05-e4f198d661ca",
+    "ats": "lever",
+    "location": "India"
+  },
+  {
+    "company": "Zeta",
+    "title": "Director Product Management",
+    "url": "https://jobs.lever.co/zeta/da8f70af-d6dc-4141-8385-3c4540ca9fe3",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Meesho",
+    "title": "Director - Product",
+    "url": "https://jobs.lever.co/meesho/65435df1-9a07-416e-9b97-381045f9f970",
+    "ats": "lever",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Jobgether",
+    "title": "Sr Manager, Product",
+    "url": "https://jobs.lever.co/jobgether/7bd027a7-b49a-44ef-940f-0f4ed474c090",
+    "ats": "lever",
+    "location": "India (Remote)"
+  },
+  {
+    "company": "Saviynt",
+    "title": "Sr Product Ops Manager",
+    "url": "https://jobs.lever.co/saviynt/9b68814f-4714-48d1-8b9c-d7829316b62f",
+    "ats": "lever",
+    "location": "India"
+  },
+  {
+    "company": "Sarvam AI",
+    "title": "Product Manager",
+    "url": "https://www.sarvam.ai/careers/jobs/c4bb3b2c-7608-4d57-8761-650b4222ac13",
+    "ats": "unknown",
+    "location": "Bangalore, India"
+  },
+  {
+    "company": "Ema",
+    "title": "Customer Engagement Manager",
+    "url": "https://jobs.ashbyhq.com/ema",
+    "ats": "ashby",
+    "location": "Bangalore, India"
   }
 ]

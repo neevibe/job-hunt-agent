@@ -50,13 +50,26 @@ const US_CA_ONLY = /\b(United States|USA|U\.S\.?)\s*(&|and)?\s*(Canada)?\b.*\bre
 const COUNTRY_RESTRICTED = /\b(US only|USA only|United States only|Canada only|UK only|EU only|Europe only)\b/i;
 
 function isLocationEligible(location) {
-  const loc = location || '';
-  if (/bangalore|india/i.test(loc)) return true; // exact target market
-  if (/remote,?\s*global|global\s*remote|remote\s*-?\s*worldwide|anywhere/i.test(loc)) return true;
-  if (US_CA_ONLY.test(loc) || COUNTRY_RESTRICTED.test(loc)) return false;
-  // Plain "Remote" with no country qualifier is usually treated as open — allow, adapter will honestly answer any work-auth question
-  if (/^remote$/i.test(loc.trim())) return true;
-  // Region-restricted (single non-India country/city listed, no "remote" or "global") -> not eligible
-  if (/\b(United States|USA|Canada|UK|United Kingdom)\b/i.test(loc) && !/remote/i.test(loc)) return false;
-  return true; // default: allow, let the honest-answer adapter surface any real disqualifier
+  const loc = (location || '').toLowerCase();
+  
+  // Explicit India/Bangalore — always yes
+  if (/bangalore|bengaluru|india|hyderabad|mumbai|delhi|chennai|pune/.test(loc)) return true;
+  
+  // Global remote — yes
+  if (/remote.*global|global.*remote|worldwide|anywhere/.test(loc)) return true;
+  
+  // US/Canada/Americas restricted — no
+  if (/north america|americas|united states|usa|u\.s\.|canada|new york|san francisco|seattle|washington|boston|austin|chicago|denver|los angeles|portland|miami|atlanta|dc\b/.test(loc)) return false;
+  
+  // EU/UK restricted without Asia/India — no
+  if (/emea|europe|berlin|london|uk\b|united kingdom/.test(loc) && !/asia|apac|india/.test(loc)) return false;
+  
+  // Hybrid anywhere (means onsite required) — no unless India
+  if (/hybrid/.test(loc)) return false;
+  
+  // Plain "Remote" with no regional restriction — allow
+  if (/remote/.test(loc)) return true;
+  
+  // Default: reject (safer than allowing non-remote non-India)
+  return false;
 }

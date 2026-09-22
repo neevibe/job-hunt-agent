@@ -121,6 +121,7 @@ async function fillGreenhouseForm(page, applyUrl, customAnswers = {}) {
     else if (/privacy polic/i.test(dd.label)) answer = STANDARD_ANSWERS.privacyPolicy;
     else if (/gender|race|hispanic|latino|ethnicity|veteran|disability status/i.test(dd.label)) answer = STANDARD_ANSWERS.eeoc;
     else if (/how did you hear/i.test(dd.label)) answer = 'Company website';
+    else if (/interviewed.*before|previously.*applied|applied.*before/i.test(dd.label)) answer = 'No';
     else {
       const matchKey = Object.keys(customAnswers).find((k) => dd.label.toLowerCase().includes(k.toLowerCase()));
       if (matchKey) answer = customAnswers[matchKey];
