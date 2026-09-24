@@ -60,14 +60,47 @@ async function fillGreenhouseForm(page, applyUrl, customAnswers = {}) {
   try { await page.fill('#phone', PROFILE.phone); filled.push('phone'); await deselect(); }
   catch (e) { errors.push(`phone: ${e.message.slice(0, 50)}`); }
 
+  // ---- Location (City) react-select autocomplete ----
+  try {
+    const locInput = await page.$('#candidate-location');
+    if (locInput) {
+      await locInput.click();
+      await page.waitForTimeout(300);
+      await locInput.type('Bangalore', { delay: 50 });
+      await page.waitForTimeout(1000); // wait for autocomplete options
+      // Select first matching option
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.press('Enter');
+      filled.push('location_city(Bangalore)');
+      await deselect();
+    }
+  } catch (e) { skipped.push(`location_city: ${e.message.slice(0, 40)}`); }
+
   // ---- Resume ----
   try {
-    const fileInput = await page.$('input[type="file"]');
-    if (fileInput) {
-      await fileInput.setInputFiles(RESUME_PDF);
+    // Greenhouse has a hidden file input with id="resume" and a separate "Attach" button
+    // Either directly set the file input or trigger the file chooser
+    const resumeInput = await page.$('#resume');
+    if (resumeInput) {
+      // Direct file input approach
+      await resumeInput.setInputFiles(RESUME_PDF);
       filled.push('resume');
-      await page.waitForTimeout(2000);
-    } else skipped.push('resume (no file input)');
+      await page.waitForTimeout(3000); // Wait for upload to process
+    } else {
+      // Fallback: click Attach button and handle file chooser
+      const attachBtn = await page.$('button:has-text("Attach")');
+      if (attachBtn) {
+        const [fileChooser] = await Promise.all([
+          page.waitForEvent('filechooser', { timeout: 10000 }),
+          attachBtn.click(),
+        ]);
+        await fileChooser.setFiles(RESUME_PDF);
+        filled.push('resume');
+        await page.waitForTimeout(3000);
+      } else {
+        skipped.push('resume (no file input)');
+      }
+    }
   } catch (e) { errors.push(`resume: ${e.message.slice(0, 50)}`); }
 
   // ---- LinkedIn (find text input by label) ----
@@ -122,6 +155,16 @@ async function fillGreenhouseForm(page, applyUrl, customAnswers = {}) {
     else if (/gender|race|hispanic|latino|ethnicity|veteran|disability status/i.test(dd.label)) answer = STANDARD_ANSWERS.eeoc;
     else if (/how did you hear/i.test(dd.label)) answer = 'Company website';
     else if (/interviewed.*before|previously.*applied|applied.*before/i.test(dd.label)) answer = 'No';
+    // Location and authorization questions
+    else if (/location.*city|city.*location|located in.*city/i.test(dd.label)) answer = 'Bangalore';
+    else if (/authorized.*work.*lawfully|lawfully.*authorized|work authorization/i.test(dd.label)) answer = 'No'; // India-based, not US authorized
+    else if (/legally.*authorized.*work.*in the country|authorized.*work.*country/i.test(dd.label)) answer = 'Yes'; // For India-based jobs, authorized in India
+    else if (/currently located in.*bay area|bay area|san francisco/i.test(dd.label)) answer = 'No';
+    else if (/registered as an employer|employer.*registered/i.test(dd.label)) answer = 'Other';
+    else if (/willing.*relocate|relocate.*willing/i.test(dd.label)) answer = 'No'; // India-based, not US relocating
+    else if (/willing.*work.*san francisco|willing.*work in the bay area/i.test(dd.label)) answer = 'No';
+    else if (/confirm.*read|confirm.*privacy|confirm.*information|i confirm/i.test(dd.label)) answer = 'Yes'; // Privacy/confirmation checkboxes
+    else if (/best team wins|culture|values/i.test(dd.label)) answer = 'Collaboration, ownership, and shipping high-quality work together';
     else {
       const matchKey = Object.keys(customAnswers).find((k) => dd.label.toLowerCase().includes(k.toLowerCase()));
       if (matchKey) answer = customAnswers[matchKey];
@@ -157,22 +200,28 @@ async function fillGreenhouseForm(page, applyUrl, customAnswers = {}) {
     if (/linkedin/i.test(tf.label)) continue; // already handled
     let value = null;
     if (/earliest.*start|when.*start working/i.test(tf.label)) value = STANDARD_ANSWERS.earliestStart;
+    else if (/most recent employer|current employer|employer/i.test(tf.label)) value = PROFILE.currentEmployer;
+    else if (/most recent.*job title|current.*job title|job title/i.test(tf.label)) value = PROFILE.currentJobTitle;
+    else if (/preferred.*start|start date/i.test(tf.label)) value = STANDARD_ANSWERS.earliestStart;
+    else if (/salary.*expectation|expected.*salary|compensation/i.test(tf.label)) value = '₹50L+ fixed (negotiable based on total comp)';
     else {
       const matchKey = Object.keys(customAnswers).find((k) => tf.label.toLowerCase().includes(k.toLowerCase()));
       if (matchKey) value = customAnswers[matchKey];
     }
     if (!value) { skipped.push(`text[${tf.label.slice(0, 40)}] no answer mapped`); continue; }
     try {
-      await page.evaluate(({ id, val, tag }) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        const proto = tag === 'TEXTAREA' ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
-        const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
-        setter.call(el, val);
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-        el.dispatchEvent(new Event('change', { bubbles: true }));
-      }, { id: tf.id, val: value, tag: tf.tag });
+      // Clear and type properly to trigger React state updates
+      const inputEl = await page.$(`#${tf.id}`);
+      if (inputEl) {
+        await inputEl.click();
+        await inputEl.fill(''); // Clear first
+        await inputEl.fill(value);
+        await page.waitForTimeout(100);
+        // Blur to trigger validation
+        await page.evaluate((id) => document.getElementById(id)?.blur(), tf.id);
+      }
       filled.push(`text[${tf.label.slice(0, 30)}]`);
+      await page.waitForTimeout(200); // Small delay for validation
       await deselect();
     } catch (e) { errors.push(`text[${tf.label.slice(0, 20)}]: ${e.message.slice(0, 30)}`); }
   }
@@ -181,10 +230,30 @@ async function fillGreenhouseForm(page, applyUrl, customAnswers = {}) {
 }
 
 async function submitGreenhouseForm(page) {
+  // Scroll to bottom to ensure submit button is visible and all fields validated
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(500);
+  
+  // Check for validation errors before clicking
+  const errorsBeforeSubmit = await page.evaluate(() => {
+    const errorEls = document.querySelectorAll('[class*="error"], .field-error, [aria-invalid="true"]');
+    return Array.from(errorEls).map(e => e.textContent?.trim()).filter(Boolean);
+  });
+  if (errorsBeforeSubmit.length > 0) {
+    console.log('⚠️ Validation errors before submit:', errorsBeforeSubmit.slice(0, 5));
+  }
+  
   const btn = await page.$('button:has-text("Submit Application"), button[type="submit"]');
   if (!btn) throw new Error('submit button not found');
-  await btn.click();
-  await page.waitForTimeout(5000);
+  
+  // Force click in case button is obscured
+  await btn.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(200);
+  await btn.click({ force: true });
+  
+  // Wait longer for network + page change
+  await page.waitForTimeout(6000);
+  
   const confirmed = await page.evaluate(() => {
     const text = document.body.textContent || '';
     return /thank you|application (received|submitted)|we('| ha)ve received|successfully submitted/i.test(text);

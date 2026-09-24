@@ -29,10 +29,20 @@ function readProfile() {
     location: pick('location'),
     linkedin: pick('linkedin'),
     portfolioUrl: pick('portfolio_url'),
+    github: 'https://github.com/neevibe',
+    twitter: 'https://x.com/neerajprakash27',
+    passportCountry: 'India',
+    countryOfResidence: 'India',
+    asyncExperience: '10+ years working in async/remote environments across global teams at Amazon, Bidgely, and BIAL. Key practices: detailed written documentation, async Slack/email with clear context, timezone-aware scheduling, recorded Loom videos for walkthroughs, and GitLab/Notion for transparent project tracking. Successfully coordinated US/India timezones through overlap windows and detailed async handoffs.',
+    openSourceContributions: 'Maintain public repositories on GitHub including job-hunt-agent (AI-powered job application automation) and innovation-scout (multi-source intelligence platform). Active contributor to AI/ML tooling and technical blog posts.',
   };
 }
 
 const PROFILE = readProfile();
+
+// Add employment history to PROFILE
+PROFILE.currentEmployer = 'Bangalore International Airport Limited (BIAL)';
+PROFILE.currentJobTitle = 'Senior AI Product Manager';
 
 const RESUME_PDF = path.join(os.homedir(), 'Downloads', 'Neeraj_Prakash.pdf');
 

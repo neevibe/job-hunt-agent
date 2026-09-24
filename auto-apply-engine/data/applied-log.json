@@ -1,0 +1,36 @@
+[
+  {
+    "company": "Celonis",
+    "title": "Associate Principal Product Manager - Networks",
+    "url": "https://job-boards.greenhouse.io/celonis/jobs/7777102003",
+    "ats": "greenhouse",
+    "ts": "2026-09-23T05:37:34.368Z",
+    "filled": 18,
+    "status": "submitted"
+  },
+  {
+    "company": "GitLab",
+    "title": "Senior Program Manager, Enterprise Technology & AI",
+    "url": "https://job-boards.greenhouse.io/gitlab/jobs/8584282002",
+    "status": "fill_error",
+    "error": "page.evaluate: Target page, context or browser has been closed",
+    "ts": "2026-09-23T05:58:35.911Z"
+  },
+  {
+    "company": "Arcesium",
+    "title": "Technical Product Manager",
+    "url": "https://job-boards.greenhouse.io/arcesiumllc/jobs/5228329007",
+    "ats": "greenhouse",
+    "ts": "2026-09-23T06:18:12.143Z",
+    "filled": 11,
+    "status": "timeout_unconfirmed"
+  },
+  {
+    "company": "Meesho",
+    "title": "Senior Product Manager",
+    "url": "https://job-boards.greenhouse.io/meesho/jobs/6538430",
+    "status": "fill_error",
+    "error": "page.evaluate: Target page, context or browser has been closed",
+    "ts": "2026-09-23T06:18:43.772Z"
+  }
+]

@@ -44,11 +44,35 @@ async function fillAshbyForm(page, applyUrl, customAnswers = {}) {
 
   // ---- Resume ----
   try {
-    const fileInputs = await page.$$('input[type="file"]');
-    if (fileInputs.length > 0) {
-      await fileInputs[0].setInputFiles(RESUME_PDF);
+    // Ashby has a specific resume field with id _systemfield_resume
+    let resumeInput = await page.$('#_systemfield_resume');
+    if (!resumeInput) {
+      // Fallback to any file input
+      const fileInputs = await page.$$('input[type="file"]');
+      resumeInput = fileInputs.length > 0 ? fileInputs[fileInputs.length - 1] : null; // last one is usually resume
+    }
+    if (resumeInput) {
+      await resumeInput.setInputFiles(RESUME_PDF);
       filled.push('resume');
-      await page.waitForTimeout(1500);
+      // Wait for resume parsing to complete (Ashby shows "Parsing your resume..." then removes it)
+      await page.waitForTimeout(3000);
+      // Wait up to 20s for parsing indicator to disappear
+      try {
+        await page.waitForFunction(
+          () => !document.body.textContent?.includes('Parsing your resume'),
+          { timeout: 20000 }
+        );
+        await page.waitForTimeout(1000);
+      } catch (e) {
+        // Timeout - check if there's a resume error
+        const hasResumeError = await page.evaluate(() => 
+          document.body.textContent?.includes('Failed to fetch') ||
+          document.body.textContent?.includes('Missing entry for required field: Resume')
+        );
+        if (hasResumeError) {
+          errors.push('resume: upload failed (server error)');
+        }
+      }
     } else {
       skipped.push('resume (no file input)');
     }
@@ -62,6 +86,41 @@ async function fillAshbyForm(page, applyUrl, customAnswers = {}) {
       filled.push('linkedin');
     }
   } catch (e) { errors.push(`linkedin: ${e.message.slice(0, 60)}`); }
+
+  // ---- Github Profile ----
+  try {
+    const githubField = await findFieldByLabel(page, /github/i);
+    if (githubField) {
+      await githubField.fill(PROFILE.github);
+      filled.push('github');
+    }
+  } catch (e) { /* optional field, ignore */ }
+
+  // ---- Twitter / X Profile ----
+  try {
+    const twitterField = await findFieldByLabel(page, /twitter|x profile/i);
+    if (twitterField) {
+      await twitterField.fill(PROFILE.twitter);
+      filled.push('twitter');
+    }
+  } catch (e) { /* optional field, ignore */ }
+
+  // ---- Passport Country / Country of Residence ----
+  try {
+    const passportField = await findFieldByLabel(page, /passport.*country/i);
+    if (passportField) {
+      await passportField.fill(PROFILE.passportCountry);
+      filled.push('passportCountry');
+    }
+  } catch (e) { /* optional field, ignore */ }
+
+  try {
+    const residenceField = await findFieldByLabel(page, /country.*residence/i);
+    if (residenceField) {
+      await residenceField.fill(PROFILE.countryOfResidence);
+      filled.push('countryOfResidence');
+    }
+  } catch (e) { /* optional field, ignore */ }
 
   // ---- Checkboxes (visa sponsorship, relocation, timezone-based, etc.) ----
   const checkboxQuestions = await page.$$eval('input[type="checkbox"]', (boxes) =>
@@ -230,15 +289,35 @@ async function getRadioGroups(page) {
 module.exports = { fillAshbyForm, submitAshbyForm };
 
 async function submitAshbyForm(page) {
+  // Scroll to bottom to ensure submit button is visible and all fields validated
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(500);
+  
+  // Check for validation errors before clicking
+  const errorsBeforeSubmit = await page.evaluate(() => {
+    const errorEls = document.querySelectorAll('[class*="error"], .field-error, [class*="_error"], [aria-invalid="true"]');
+    return Array.from(errorEls).map(e => e.textContent?.trim()).filter(Boolean);
+  });
+  if (errorsBeforeSubmit.length > 0) {
+    console.log('⚠️ Validation errors before submit:', errorsBeforeSubmit.slice(0, 5));
+  }
+  
   // Ashby submit button text is typically "Submit Application"
   const btn = await page.$('button[type="submit"], button:has-text("Submit Application")');
   if (!btn) throw new Error('submit button not found');
-  await btn.click();
-  await page.waitForTimeout(4000);
+  
+  // Force click in case button is obscured
+  await btn.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(200);
+  await btn.click({ force: true });
+  
+  // Wait longer for network + page change
+  await page.waitForTimeout(6000);
+  
   // Success is usually a URL change or a confirmation heading
   const confirmed = await page.evaluate(() => {
     const text = document.body.textContent || '';
-    return /thank you|application (received|submitted)|we('| ha)ve received/i.test(text);
+    return /thank you|application (received|submitted)|we('| ha)ve received|successfully submitted/i.test(text);
   });
   return confirmed;
 }
